@@ -41,7 +41,8 @@ Legend for the status of each section:
 | Term | Meaning |
 |---|---|
 | **Turn** (*Runde*) | One daily bot run. Collects all actions since the last turn and resolves them. |
-| **Action** (*Aktion*) | Everything a player wrote in the adventure channel since the last turn. |
+| **Action text** | Everything a player wrote in the adventure channel since the last turn. |
+| **Action** (*Aktion*) | The one action type (with parameters) the LLM maps an action text to, executed by Python. |
 | **Scene** (*Szene*) | What happens to one group of players during a turn. |
 | **Group** (*Gruppe*) | All active players at the same location during a turn. |
 | **Location** (*Ort*) | A node on the world map. |
@@ -49,27 +50,78 @@ Legend for the status of each section:
 
 ---
 
-## 3. The turn cycle ❓
+## 3. The turn cycle ✅
 
-What happens in one bot run, in order. This is the core of the whole system.
+### Timing
 
-1. Read all new messages in the adventure channel since `last_processed_message_id`.
+- One turn per day in the **evening, around 20:00 German time**. Players read
+  the chapter in the evening and write their next action during the following day.
+- GitHub cron is UTC, so the turn shifts by one hour with summer/winter time.
+  Runs can also be delayed by 15–60 minutes. Both are acceptable.
+- `workflow_dispatch` lets the game master trigger a turn manually (e.g. for testing).
+- A `paused` flag in `state.json` skips turns (e.g. during holidays).
+
+### What counts as an action
+
+- Every message from a player in `#abenteuer` since the last turn is part of their action.
+- Messages starting with `//` are ignored (out-of-character talk). Longer chats
+  should go to a separate channel.
+- All messages of one player since the last turn are combined in order. Later
+  messages can add to or correct earlier ones ("Korrektur: …"); the LLM interprets that.
+- Players with no messages are idle.
+
+### One action = one thing
+
+- The LLM maps each player's text to **exactly one action from a fixed list of
+  action types** (e.g. move, attack, talk, use item, give item, search, rest).
+  The action types and their exact rules are defined together with the
+  mechanics in the following sections.
+- The action is then carried out **deterministically by Python** (dice rolls,
+  damage, item transfer, movement). The LLM only interprets the text beforehand
+  and narrates the result afterwards.
+- If a player writes several steps ("I go to the city, buy a sword and kill the
+  dragon"), only the first reasonable step happens. The narrator stops there.
+- If the text can't be mapped to any valid action (impossible, or the item
+  doesn't exist), the action fails or becomes the closest sensible action, and
+  the narrator explains why.
+
+### Groups
+
+- All active players at the same location form a group and are resolved
+  together in one scene, so they can work together.
+- If a player moves away, the group splits from the next turn on.
+
+### Steps of one bot run
+
+1. Read all new messages in `#abenteuer` since `last_processed_message_id`.
 2. Handle meta commands (join, etc.).
-3. Merge each player's messages into one action. Players with no messages are idle.
+3. Combine each player's messages into one action text. Players with no messages are idle.
 4. Group players by location.
-5. For each group: **Resolve** (LLM returns a structured JSON outcome) →
-   **validate and apply** (Python checks it against the rules, rolls dice, updates the state).
-6. For each group: **Narrate** (LLM writes the German text from the checked outcome).
-7. Post the chapter to the adventure channel.
-8. Edit the character sheets and the quest log message.
-9. Commit the state and the chronicle.
+5. For each group: **Interpret** — the LLM maps each action text to one action
+   type with parameters (structured JSON).
+6. For each group: **Execute** — Python validates the actions, rolls dice and
+   updates the state.
+7. For each group: **Narrate** — the LLM writes the German text from the
+   executed outcome.
+8. **Commit the state** (including the turn number and the new
+   `last_processed_message_id`).
+9. Post the chapter to `#abenteuer`, marked with the turn number.
+10. Edit the character sheets and the quest log message.
 
-Open questions:
+### Safe to re-run
 
-- Time of day for the turn (keep in mind that GitHub cron is UTC and can be delayed).
-- What counts as an action: every message in the channel, or only some? How do players chat out of character?
-- How several messages from the same player are combined (all together, or the last one wins).
-- Order of steps 7 and 9, so that a failed run can be safely repeated.
+The state is committed *before* posting. Each chapter post contains its turn
+number. On start, the bot checks whether the chapter for the turn already in
+the state was posted. If not, it posts that chapter (stored in
+`chronik/tag-NNN.md`) instead of resolving a new turn. That way a crashed run
+never resolves a turn twice or posts it twice.
+
+### The daily post
+
+- A short opening line with the day number (*Tag 12*).
+- One section per group, headed by the location name.
+- Each player's name is in bold where their part begins.
+- Each active player is **@mentioned once per turn**, so they get a notification.
 
 ## 4. Characters, classes and stats ❓
 
