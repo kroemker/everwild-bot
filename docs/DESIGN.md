@@ -202,7 +202,7 @@ class can do a bit of everything and is especially good at one thing.
 - **Showing rolls**: each player's part ends with one line in Discord subtext
   format, e.g. `-# 🎲 Brakka: 14 + 3 = 17 gegen 12 → Erfolg`.
 
-## 6. Elements 💡
+## 6. Elements ✅
 
 Elements are a shared vocabulary for places, peoples, creatures, items and
 characters. They give the world generator structure (a consistent world
@@ -261,24 +261,93 @@ Three pairs of opposites: **Feuer ↔ Wasser, Erde ↔ Luft, Licht ↔ Schatten*
   the players.
 - **Items** (weapons, armour, scrolls, potions) can carry an element. Enemies have 1–2 elements.
 
-Open questions:
+### Decided
 
-- Is the list of elements right (anything to add, like Natur or Blitz as its own element)?
-- Pairs of opposites (simple, symmetric) or a cycle like
-  Feuer → Luft → Erde → Wasser → Feuer (asymmetric, more like Pokémon)?
-- Starting element chosen at joining: yes or no?
-- Should the region's element affect fights there, or only what is generated there?
+- Exactly the 6 elements above plus Stahl. No further elements.
+- Matchups use the three pairs of opposites, not a cycle.
+- Each player picks a starting element (or Stahl) when joining.
+- A region's elements only decide what is **generated** there (look, peoples,
+  creatures, items). They have no effect on fights or checks in that region.
 
-## 7. Combat ❓
+## 7. Combat 💡
 
-💡 One turn = one scene. A normal fight is resolved in one turn based on each
-player's stated tactics. A boss fight takes at most 2–3 turns.
+All numbers in this section are a first draft. Before launch they get tuned
+with a small simulation script that plays thousands of fights.
 
-Open questions:
+### When a fight happens
 
-- How enemy stats look and how damage is calculated.
-- Whether players can flee.
-- What idle players do in a fight.
+- Hostile creatures at a location attack when players arrive, unless the
+  players sneak past (GES check) or talk their way out.
+- Players can also start a fight themselves (attack action).
+- Hostile creatures are part of the world file, not invented on the spot.
+
+### Fight rounds
+
+- A fight runs for **up to 3 rounds per turn**, simulated by Python.
+- Each player's action for the turn is their **tactic for the whole fight**
+  ("Ich greife den Oger mit der Axt an", "Ich schütze Mira mit dem Schild").
+  It is repeated every round.
+- An active ability is used in the first round (then the cooldown starts).
+- If enemies are still standing after 3 rounds, the fight continues next
+  turn. Players can change tactics or flee. Bosses have enough HP that they
+  usually take 2–3 turns; no special rule needed.
+
+### Combat actions
+
+| Action | Effect |
+|---|---|
+| **Angreifen** | Attack one enemy every round with the equipped weapon (or a basic spell). |
+| **Fähigkeit** | Use the class ability in round 1, then attack normally. |
+| **Verteidigen** | Attacks against yourself and one chosen ally have disadvantage. |
+| **Heilen / Gegenstand** | Use a potion, scroll or healing in round 1, then defend. |
+| **Fliehen** | GES check (Mittel). Success: back to the previous location. Failure: enemies get one free round against you. |
+
+Idle players in a fight automatically **defend** themselves.
+
+### Attacks and damage
+
+- **Player attack**: d20 + attribute against the enemy's *Abwehr*. Melee uses
+  STÄ, ranged GES, spells VER.
+- **Damage**: weapon die + attribute. Draft dice: Dolch d4, Bogen d6,
+  Schwert d8, Streitaxt d10 (two-handed).
+- **Magier basic spell**: *Arkaner Blitz*, d6 + VER in the character's element.
+  So the Magier can always attack without a weapon.
+- **Elements** (§6): opposite element → advantage and +50 % damage; same
+  element → half damage.
+- **Enemy attack**: d20 + enemy attack bonus against the player's
+  *Rüstungswert* = 10 + armour (+1 for Krieger).
+- Enemies pick a random target in the group.
+
+### Enemy stats
+
+Enemies don't get freely invented numbers. The world file gives each enemy a
+**tier**; Python looks up the stats and scales them by region level.
+
+| Tier | Example | HP | Abwehr | Attack | Damage |
+|---|---|---|---|---|---|
+| Schwach | Ratte, Goblin | 4 | 10 | +2 | d4 |
+| Normal | Wolf, Bandit | 8 | 12 | +3 | d6 |
+| Stark | Oger | 16 | 13 | +4 | d8 |
+| Elite | Hauptmann der Wache | 24 | 14 | +5 | d10 |
+| Boss | Region boss | 40 per player | 15 | +6 | 2d6 |
+
+- **Scaling with group size**: the number of enemies (and boss HP) scales
+  with the number of players present, so a solo player and a group of six
+  both get a fair fight.
+- Enemy health is shown in words, not numbers ("Der Oger taumelt, schwer verwundet").
+
+### 0 HP: down, not dead
+
+- A character at 0 HP is **kampfunfähig** (down) and drops out of the fight.
+- If the group wins (or flees successfully), down characters wake up with 1 HP.
+- A healer can bring a down character back into the fight.
+- A character only **dies** (§10) if the whole group is down, or if they are
+  alone.
+
+### Healing outside fights
+
+- Resting (*Rasten*) is an action: recover half of max HP.
+- At a rest point or inn: full HP. The Kleriker passive adds extra HP to a group rest.
 
 ## 8. Items, inventory and equipment ❓
 
@@ -362,6 +431,9 @@ the player a whole day.
 - A join message can also contain the first action; it is carried out in the
   same turn.
 - New characters start near the party, at the party's level minus 1.
+- The join message also names a starting element (§6). If none is given, the
+  LLM picks one that fits the background sentence, or Stahl. It can be changed
+  during the first 3 turns, like the class.
 
 ### Idling and leaving 💡
 
