@@ -31,8 +31,8 @@ Legend for the status of each section:
 | World clock | The world waits for the players. Nothing happens on its own between turns. |
 | Tone | Narrator: classic, serious high fantasy. NPCs speak in their own voice; some are allowed to be funny. |
 | Game end | After the final boss: an epilogue, then the game is over. The state stays in the repo. |
-| Death | Players are resurrected but lose part of their loot (details in §9). |
-| Inventory display | No daily clutter: the bot edits one message per player in place in a character sheet channel (details in §12). |
+| Death | Players are resurrected but lose part of their loot (details in §10). |
+| Inventory display | No daily clutter: the bot edits one message per player in place in a character sheet channel (details in §15). |
 
 ---
 
@@ -150,8 +150,8 @@ class can do a bit of everything and is especially good at one thing.
 
 - Players choose the word form of their class name (e.g. *Waldläuferin*, *Klerikerin*).
 - The same class may be taken by several players.
-- Starting gear per class: defined together with items (§7).
-- Exact numbers (HP, damage) may still be adjusted once dice and combat (§5, §6) are decided.
+- Starting gear per class: defined together with items (§8).
+- Exact numbers (HP, damage) may still be adjusted once dice and combat (§5, §7) are decided.
 
 ### Abilities and cooldown
 
@@ -159,7 +159,7 @@ class can do a bit of everything and is especially good at one thing.
 - Each active ability has a **cooldown of 3 turns** after use.
 - Using an ability counts as the player's one action for the turn.
 - The character sheet shows the state: *Feuerball: bereit* / *Feuerball: bereit in 2 Tagen*.
-- A **second ability** is unlocked at a higher level (e.g. level 5), defined with §8.
+- A **second ability** is unlocked at a higher level (e.g. level 5), defined with §9.
 
 ### What a player chooses
 
@@ -168,17 +168,108 @@ class can do a bit of everything and is especially good at one thing.
   effect on the rules. (Someone who wants to be "ein Drache in Menschengestalt"
   can be that here, as a Krieger.)
 
-## 5. Checks and dice ❓
+## 5. Checks and dice ✅
 
-💡 The LLM decides *whether* a check is needed and how hard it is; Python rolls
-the dice. Rolls are shown in the text (🎲 17 + 2 = 19 → Erfolg).
+- **d20 + attribute** against a target number.
+- Not every action needs a roll. A roll is only needed when the outcome is
+  uncertain *and* failing would be interesting. Walking down a road or talking
+  to a friendly innkeeper just happens.
+- The LLM decides whether a roll is needed, **which attribute** is used (forcing
+  a door: STÄ, picking a lock: GES, deciphering a scroll: VER) and picks **one of
+  four difficulty levels**. Python looks up the number and rolls.
+
+| Difficulty | Target number | Example |
+|---|---|---|
+| Leicht | 8 | Climbing a low wall |
+| Mittel | 12 | Picking a simple lock |
+| Schwer | 16 | Convincing a suspicious guard |
+| Heroisch | 20 | Jumping across a gorge |
+
+- **Criticals**: a natural 20 always succeeds and gives a bonus. A natural 1
+  always fails with a mishap, which is unpleasant but never deadly on its own.
+- **Advantage / disadvantage**: roll two d20 and keep the higher / lower. Used
+  instead of many small modifiers:
+  - a player helps another player;
+  - class traits (e.g. the Waldläufer when travelling);
+  - good items, element matchups (§6) or smart ideas give advantage;
+  - bad conditions give disadvantage.
+  - Advantage and disadvantage cancel each other out; they don't stack.
+- **Erfolg mit Haken**: missing the target by 1–2 is a success with a
+  complication (you get through the door, but the guards heard you).
+- **Retrying**: a failed check can be retried the next day unless the story
+  rules it out (the lock jammed, the guard now knows you). The LLM decides that
+  as part of the consequence.
+- **Showing rolls**: each player's part ends with one line in Discord subtext
+  format, e.g. `-# 🎲 Brakka: 14 + 3 = 17 gegen 12 → Erfolg`.
+
+## 6. Elements 💡
+
+Elements are a shared vocabulary for places, peoples, creatures, items and
+characters. They give the world generator structure (a consistent world
+instead of random details) and give players a reason to explore and prepare
+("the boss of the Glutberge is a fire creature, so we need a water weapon").
+
+### The elements
+
+| Element | Emoji | Also covers |
+|---|---|---|
+| Feuer | 🔥 | Hitze, Lava, Glut |
+| Wasser | 💧 | Eis, Frost, Meer, Nebel |
+| Erde | 🪨 | Stein, Pflanzen, Gift |
+| Luft | 🌪️ | Sturm, Blitz, Klang |
+| Licht | ☀️ | Heiliges, Heilung, Sonne |
+| Schatten | 🌑 | Dunkelheit, Tod, Fluch |
+| Stahl (no element) | ⚔️ | Plain weapons and mundane things |
+
+The "also covers" column lets the narrator say *Frostklinge* or *Blitzpfeil*
+while the rules only know the six elements.
+
+### Matchups
+
+Three pairs of opposites: **Feuer ↔ Wasser, Erde ↔ Luft, Licht ↔ Schatten**.
+
+- Attacking with the **opposite** element of the target: advantage on the attack
+  and +50 % damage.
+- Attacking with the **same** element as the target: half damage.
+- **Stahl** is neutral against everything: never strong, never resisted.
+- Python looks up the matchup. The LLM only tags things with an element from the fixed list.
+
+### Characters
+
+- At joining, each player picks a **starting element** (or Stahl). Together with
+  the class this gives 6 × 7 combinations (*Schattenkrieger*, *Lichtmagierin*, …).
+- A character's **class ability takes their element**: a water Magier's
+  *Feuerball* becomes a wave, a shadow Krieger's *Wuchtschlag* is a blow of
+  darkness. Same rules, different flavour and matchups.
+- **Affinity** per element, level 0–3:
+  - +affinity on rolls where that element is used;
+  - damage of that element against the character is halved from affinity 2;
+  - at most 2 elements with affinity per character, and never two opposites.
+- Affinity grows through the world (shrines, teachers, quests), not by
+  grinding. Details with experience and levels (§9).
+
+### World
+
+- Every **region** has 1–2 elements, which decide its look and contents:
+  Feuer + Erde = volcanic mountains, Wasser + Schatten = swamp or deep sea,
+  Luft + Licht = sky islands, Erde + Schatten = caves and the underworld, …
+- With 6 elements there are 6 single regions and 12 pairs (the 3 pairs of
+  opposites excluded). Opposite combinations (Feuer + Wasser = steam springs)
+  are reserved for special places, e.g. the final area.
+- **Peoples and creatures** are generated from element combinations as well and
+  usually live in regions of their elements. Each people has an attitude toward
+  the players.
+- **Items** (weapons, armour, scrolls, potions) can carry an element. Enemies have 1–2 elements.
 
 Open questions:
 
-- Which die (d20, 2d6, …) and how difficulty levels map to numbers.
-- Critical successes and failures.
+- Is the list of elements right (anything to add, like Natur or Blitz as its own element)?
+- Pairs of opposites (simple, symmetric) or a cycle like
+  Feuer → Luft → Erde → Wasser → Feuer (asymmetric, more like Pokémon)?
+- Starting element chosen at joining: yes or no?
+- Should the region's element affect fights there, or only what is generated there?
 
-## 6. Combat ❓
+## 7. Combat ❓
 
 💡 One turn = one scene. A normal fight is resolved in one turn based on each
 player's stated tactics. A boss fight takes at most 2–3 turns.
@@ -189,7 +280,7 @@ Open questions:
 - Whether players can flee.
 - What idle players do in a fight.
 
-## 7. Items, inventory and equipment ❓
+## 8. Items, inventory and equipment ❓
 
 Open questions:
 
@@ -199,7 +290,7 @@ Open questions:
 - Which items the LLM may create freely and which must come from the world file.
 - Giving items: already decided as a normal action. Is it limited to players at the same location?
 
-## 8. Experience and levels ❓
+## 9. Experience and levels ❓
 
 Open questions:
 
@@ -207,7 +298,7 @@ Open questions:
 - Whether XP is shared within a group.
 - Level curve, max level, what a level-up gives.
 
-## 9. Death and resurrection ❓
+## 10. Death and resurrection ❓
 
 💡 Proposal from the brainstorm:
 
@@ -219,7 +310,7 @@ Open questions:
 
 Open questions: confirm or change each point above.
 
-## 10. World, map and movement ❓
+## 11. World, map and movement ❓
 
 💡 The skeleton is generated upfront and fixed; details of each location are
 generated on first visit and then stored permanently.
@@ -231,7 +322,7 @@ Open questions:
 - Whether a map is shown to players, and how.
 - How split groups meet again.
 
-## 11. NPCs and dialogue ❓
+## 12. NPCs and dialogue ❓
 
 Open questions:
 
@@ -239,7 +330,7 @@ Open questions:
 - Whether NPCs can join the party as companions.
 - How a conversation spanning several days works.
 
-## 12. Quests and the path to the end ❓
+## 13. Quests and the path to the end ❓
 
 Open questions:
 
@@ -247,7 +338,7 @@ Open questions:
 - Side quests: pre-generated or created on the fly.
 - How the game recognizes that the final boss is beaten and the epilogue starts.
 
-## 13. Joining, idling and leaving ❓
+## 14. Joining, idling and leaving ❓
 
 ### Joining 💡
 
@@ -280,7 +371,7 @@ the player a whole day.
 Open questions: confirm or change the joining rules above; idle details; how a
 player leaves permanently.
 
-## 14. Discord output ❓
+## 15. Discord output ❓
 
 💡 Channels:
 
@@ -294,7 +385,7 @@ Open questions:
 - Discord's length limits (2000 characters per message, 4096 per embed description).
 - Whether players get pinged when something important happens to them.
 
-## 15. State files and technical setup 💡
+## 16. State files and technical setup 💡
 
 Proposed repository layout:
 
@@ -315,7 +406,7 @@ src/                 # bot code (Python)
 - A `concurrency:` group in the workflow prevents two runs at once.
 - A dry-run mode for testing that posts nothing and commits nothing.
 
-## 16. Prompting and LLM safety 💡
+## 17. Prompting and LLM safety 💡
 
 - Player text is always treated as an *attempt*, never as a fact ("Ich finde ein legendäres Schwert" does not create one).
 - The Resolve step returns structured JSON only; Python validates all state changes.
