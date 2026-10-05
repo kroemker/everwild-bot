@@ -265,7 +265,8 @@ Three pairs of opposites: **Feuer ↔ Wasser, Erde ↔ Luft, Licht ↔ Schatten*
 
 - Exactly the 6 elements above plus Stahl. No further elements.
 - Matchups use the three pairs of opposites, not a cycle.
-- Each player picks a starting element (or Stahl) when joining.
+- Each player picks a starting element (or Stahl) when joining. The starting
+  element begins at affinity 1.
 - A region's elements only decide what is **generated** there (look, peoples,
   creatures, items). They have no effect on fights or checks in that region.
 
@@ -349,7 +350,7 @@ Enemies don't get freely invented numbers. The world file gives each enemy a
 - Resting (*Rasten*) is an action: recover half of max HP.
 - At a rest point or inn: full HP. The Kleriker passive adds extra HP to a group rest.
 
-## 8. Items, inventory and equipment 💡
+## 8. Items, inventory and equipment ✅
 
 ### Where items come from
 
@@ -454,13 +455,59 @@ Every character also starts with **10 gold** and **1 Heiltrank**.
 | Schurke | Dolch | Leder | Dietriche (needed for locks) |
 | Barde | Rapier | Leder | Laute |
 
-## 9. Experience and levels ❓
+## 9. Experience and levels 💡
 
-Open questions:
+### Game length
 
-- What gives XP (fights, quests, exploration, good ideas?).
-- Whether XP is shared within a group.
-- Level curve, max level, what a level-up gives.
+All numbers below assume a game of roughly **60 turns** (about two months).
+They get tuned with the simulation script once the length is fixed.
+
+### XP sources
+
+Python hands out fixed amounts. The LLM only reports *what* happened (fight
+won, quest done, location discovered, check passed).
+
+| Event | XP | Who gets it |
+|---|---|---|
+| Fight won, per enemy tier | Schwach 5, Normal 10, Stark 20, Elite 40, Boss 100 | Every player who took part, full amount (not split) |
+| Side quest completed | 30 | Every player who took part |
+| Main quest step completed | 60 | Every player who took part |
+| New location discovered | 5 | Every player in the group |
+| Hard check passed | Schwer 5, Heroisch 10 | The player who rolled |
+
+- Fights scale with group size (§7), so every player gets the full XP of the
+  fight. Playing together is never worse than playing alone.
+- Idle players get **no XP**.
+- **Catch-up bonus**: players below the average level of all active players
+  get +50 % XP. Helps late joiners and players who were away.
+
+### Level curve
+
+- **Flat**: every level needs 100 XP. Level = 1 + XP / 100, so 340 XP is level 4.
+- **Max level 10** (900 XP). At level 10 the character gets a title in their
+  element (*Meisterin des Feuers*).
+
+### What a level-up gives
+
+- **HP**: Krieger +4, Magier +2, all others +3.
+- **Attributes**: +1 at levels 3, 6 and 9. The player can name the attribute
+  in any message; otherwise the class's main attribute is raised. Max +5.
+- **Level 5**: second class ability (with a 3-turn cooldown, like the first).
+
+| Class | Second ability (level 5) |
+|---|---|
+| Krieger | *Unerschütterlich*: can't drop below 1 HP this turn; enemies attack the Krieger instead of the allies. |
+| Waldläufer | *Spurlos*: the whole group moves past hostile creatures without a fight, no roll needed. |
+| Magier | *Elementarbarriere*: the group takes half damage in this turn's fight. |
+| Kleriker | *Gruppenheilung*: heals every group member by half their max HP and wakes down characters. |
+| Schurke | *Hinterhalt*: the group gets a free surprise round before the fight starts. |
+| Barde | *Heldenlied*: the whole group has advantage on all attacks and checks this turn. |
+
+### Element affinity
+
+Affinity (§6) is a second, separate progression track. It does not come from
+XP but from the world: shrines, teachers and quests of an element raise it
+by 1 (max 3). The starting element begins at 1.
 
 ## 10. Death and resurrection ❓
 
