@@ -269,7 +269,7 @@ Three pairs of opposites: **Feuer ↔ Wasser, Erde ↔ Luft, Licht ↔ Schatten*
 - A region's elements only decide what is **generated** there (look, peoples,
   creatures, items). They have no effect on fights or checks in that region.
 
-## 7. Combat 💡
+## 7. Combat ✅
 
 All numbers in this section are a first draft. Before launch they get tuned
 with a small simulation script that plays thousands of fights.
@@ -349,15 +349,110 @@ Enemies don't get freely invented numbers. The world file gives each enemy a
 - Resting (*Rasten*) is an action: recover half of max HP.
 - At a rest point or inn: full HP. The Kleriker passive adds extra HP to a group rest.
 
-## 8. Items, inventory and equipment ❓
+## 8. Items, inventory and equipment 💡
 
-Open questions:
+### Where items come from
 
-- Item categories (weapon, armour, consumable, quest item, miscellaneous), and whether equipment slots exist.
-- Inventory limit.
-- Gold and shops.
-- Which items the LLM may create freely and which must come from the world file.
-- Giving items: already decided as a normal action. Is it limited to players at the same location?
+The LLM never invents an item with free stats. All items are built from an
+**item catalog** (a JSON file we write by hand, like the classes): base types
+with fixed rules. The LLM only gives them a name and a description.
+
+1. **Unique items** (legendary items, quest items) are placed in the world
+   file at world generation: at a location, with an NPC or carried by a boss.
+2. **Loot** after fights and from chests: Python rolls gold and maybe an item
+   from the catalog, based on enemy tier and the elements of the region. The
+   LLM names it ("Rostiger Krummsäbel der Sumpfbanditen" = catalog *Schwert*,
+   common, Stahl).
+3. **Shops**: merchants in towns sell catalog items.
+
+### Categories and equipment slots
+
+Three equipment slots:
+
+| Slot | Contents |
+|---|---|
+| **Waffe** | One weapon. A one-handed weapon can be combined with a shield (+1 Rüstungswert). |
+| **Rüstung** | One armour. |
+| **Talisman** | Amulet or ring: +1 affinity for one element (§6) or another small bonus. |
+
+Everything else is carried in the bag:
+
+- **Verbrauchsgut**: potions, scrolls, bombs. Used up on use.
+- **Questgegenstand**: keys, artifacts, letters. Never lost, never sold.
+- **Wertsachen**: gems, trophies. Only good for selling.
+
+### Weapons and armour
+
+| Weapon | Damage | Attribute | Notes |
+|---|---|---|---|
+| Dolch | d4 | STÄ or GES | Light |
+| Rapier | d6 | STÄ or GES | Light |
+| Streitkolben | d6 | STÄ | |
+| Schwert | d8 | STÄ | |
+| Streitaxt | d10 | STÄ | Two-handed, Krieger only |
+| Bogen | d6 | GES | Ranged |
+| Stab | d4 | STÄ | Magier: +1 on the Arkaner Blitz |
+
+| Armour | Rüstungswert bonus | Who |
+|---|---|---|
+| Stoff | 0 | Everyone |
+| Leder | +1 | Everyone |
+| Kettenhemd | +2 | Krieger, Kleriker, Waldläufer |
+| Plattenpanzer | +3 | Krieger only |
+
+### Rarity
+
+| Rarity | Bonus |
+|---|---|
+| Gewöhnlich | none |
+| Selten | +1 to hit and damage (weapons) or +1 Rüstungswert (armour) |
+| Legendär | +2, plus one special effect; only placed in the world file |
+
+Weapons and armour can have an element (§6). Plain ones are Stahl.
+
+### Consumables (draft)
+
+- **Heiltrank**: restores half of max HP.
+- **Schriftrolle** (Magier only): a one-time spell in the scroll's element,
+  e.g. a damage spell against all enemies.
+- **Elementöl**: coats a weapon with an element for one fight.
+- No food, hunger or weight rules.
+
+### Inventory limit
+
+- **10 bag slots**. Consumables of the same kind stack up to 5 per slot.
+- Equipped items and quest items don't count toward the limit.
+- Gold has no limit.
+- If the bag is full, new loot stays where it was found until the player
+  makes room.
+
+### Using, equipping, giving
+
+- **Equipping** or swapping equipment is free and doesn't use the action
+  ("Ich ziehe das Kettenhemd an und gehe zum Tor").
+- **Using** a consumable is the action (in fights: in round 1, §7).
+- **Giving** an item to a player at the same location is the giver's action.
+  The receiver doesn't need to do anything.
+- **Dropping** an item is free.
+
+### Gold and shops
+
+- Gold comes from loot, quests and selling.
+- Merchants buy items at half their price. The Barde's *Betören* can get a discount.
+- Prices come from the catalog by type and rarity.
+
+### Starting gear
+
+Every character also starts with **10 gold** and **1 Heiltrank**.
+
+| Class | Weapon | Armour | Extra |
+|---|---|---|---|
+| Krieger | Schwert + Schild | Kettenhemd | |
+| Waldläufer | Bogen, Dolch (in the bag) | Leder | |
+| Magier | Stab | Stoff | 1 Schriftrolle in the character's element |
+| Kleriker | Streitkolben | Kettenhemd | 1 extra Heiltrank |
+| Schurke | Dolch | Leder | Dietriche (needed for locks) |
+| Barde | Rapier | Leder | Laute |
 
 ## 9. Experience and levels ❓
 
