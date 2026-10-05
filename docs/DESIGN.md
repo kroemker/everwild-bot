@@ -123,18 +123,50 @@ never resolves a turn twice or posts it twice.
 - Each player's name is in bold where their part begins.
 - Each active player is **@mentioned once per turn**, so they get a notification.
 
-## 4. Characters, classes and stats ❓
+## 4. Characters, classes and stats ✅
 
-💡 Keep it small:
+### Stats
 
 - **HP** (*Lebenspunkte*), **level** (*Stufe*), **XP** (*Erfahrung*), **gold**.
-- 3 attributes: *Stärke*, *Geschick*, *Verstand*.
-- One class ability per class, maybe a second one at a higher level.
+- 3 attributes: *Stärke* (STÄ), *Geschick* (GES), *Verstand* (VER). Each value
+  is added directly to dice rolls, usually between 0 and +3. No 3–18 scale.
+- Stats are fixed per class. No point-spending at character creation.
 
-Open questions:
+### Design rule: every class must work alone
 
-- The list of classes, their starting stats, starting gear and abilities.
-- Whether there are resources like mana or stamina, or whether abilities are limited per turn or per rest.
+Players' paths can split, so no class may depend on others to survive. Each
+class can do a bit of everything and is especially good at one thing.
+
+### Classes
+
+| Class | STÄ / GES / VER | HP | Active ability | Passive trait |
+|---|---|---|---|---|
+| **Krieger** | +3 / +1 / 0 | 14 | *Wuchtschlag*: one attack that hits for sure and does double damage | +1 armour, can use heavy weapons and armour |
+| **Waldläufer** | +1 / +3 / 0 | 11 | *Gezielter Schuss*: a ranged attack before the fight starts | Tracking and finding hidden paths, bonus when travelling |
+| **Magier** | 0 / +1 / +3 | 8 | *Feuerball*: damage to all enemies, ignores armour | Can read runes, magic scrolls and arcane objects |
+| **Kleriker** | +1 / 0 / +2 | 12 | *Heilung*: heals self or an ally at the same location | When the group rests, everyone recovers extra HP |
+| **Schurke** | 0 / +3 / +1 | 10 | *Schattenschritt*: sneaking, stealing or a stab from behind succeeds automatically | Opens locks and spots traps |
+| **Barde** | 0 / +1 / +2 | 10 | *Betören*: one conversation with an NPC succeeds automatically (convince, bluff, get a discount) | Knows legends; the narrator gives extra hints about the world |
+
+- Players choose the word form of their class name (e.g. *Waldläuferin*, *Klerikerin*).
+- The same class may be taken by several players.
+- Starting gear per class: defined together with items (§7).
+- Exact numbers (HP, damage) may still be adjusted once dice and combat (§5, §6) are decided.
+
+### Abilities and cooldown
+
+- No mana or stamina.
+- Each active ability has a **cooldown of 3 turns** after use.
+- Using an ability counts as the player's one action for the turn.
+- The character sheet shows the state: *Feuerball: bereit* / *Feuerball: bereit in 2 Tagen*.
+- A **second ability** is unlocked at a higher level (e.g. level 5), defined with §8.
+
+### What a player chooses
+
+- **Name**, **class**, and optionally **one sentence** about appearance or
+  background. The sentence is pure flavour that the narrator uses; it has no
+  effect on the rules. (Someone who wants to be "ein Drache in Menschengestalt"
+  can be that here, as a Krieger.)
 
 ## 5. Checks and dice ❓
 
@@ -217,13 +249,36 @@ Open questions:
 
 ## 13. Joining, idling and leaving ❓
 
-💡 Proposal from the brainstorm:
+### Joining 💡
 
-- Joining: `!beitreten <Name> <Klasse>`; the character is created at the next turn, placed near the party, starting at the party's level minus 1.
+Problem: the bot only reads messages once a day, so it can't answer a wrong
+join message right away. A typo or a class that doesn't exist must not cost
+the player a whole day.
+
+- A pinned message in `#abenteuer`, *So spielst du mit*, lists the classes
+  and an example join message.
+- Joining is written in plain language, no strict syntax ("Ich bin Brakka,
+  eine Kriegerin. Eine vernarbte Söldnerin aus dem Norden."). The LLM extracts
+  name, class and the background sentence.
+- Synonyms are mapped to the nearest class ("Zauberer" → Magier,
+  "Paladin" → Krieger). If the name is missing, the Discord display name is used.
+- If no class matches ("Drache"), the character still joins **in this turn**
+  as a *Wanderer* without a class: average stats, no ability. The narrator
+  includes the player in the scene and adds a short out-of-character note
+  listing the classes. The player names a class in any later message.
+- **Class change**: during their first 3 turns, a player can switch class
+  freely (also covers "I regret my choice"). After that the class is fixed.
+- A join message can also contain the first action; it is carried out in the
+  same turn.
+- New characters start near the party, at the party's level minus 1.
+
+### Idling and leaving 💡
+
 - Idle players go along passively with their group.
 - After several idle days, the character goes to camp.
 
-Open questions: confirm or change each point above; how a player leaves permanently.
+Open questions: confirm or change the joining rules above; idle details; how a
+player leaves permanently.
 
 ## 14. Discord output ❓
 
