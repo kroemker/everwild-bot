@@ -32,7 +32,7 @@ Legend for the status of each section:
 | Tone | Narrator: classic, serious high fantasy. NPCs speak in their own voice; some are allowed to be funny. |
 | Game end | After the final boss: an epilogue, then the game is over. The state stays in the repo. |
 | Death | Players are resurrected but lose part of their loot (details in §10). |
-| Inventory display | No daily clutter: the bot edits one message per player in place in a character sheet channel (details in §15). |
+| Inventory display | No daily clutter: the bot edits one message per player in place in a character sheet channel (details in §16). |
 
 ---
 
@@ -459,8 +459,18 @@ Every character also starts with **10 gold** and **1 Heiltrank**.
 
 ### Game length
 
-All numbers below assume a game of roughly **60 turns** (about two months).
-They get tuned with the simulation script once the length is fixed.
+The game length is a setting chosen when a game is started (§15). XP amounts
+stay the same; the length changes how much XP a level costs, so characters
+reach the top level around the end of the game. World size and main quest
+length scale with it too (§11, §13).
+
+| Length | Target turns | XP per level | Level 10 at |
+|---|---|---|---|
+| Kurz | ~30 | 50 | 450 XP |
+| Mittel | ~60 | 100 | 900 XP |
+| Lang | ~100 | 170 | 1530 XP |
+
+Exact numbers get tuned with the simulation script.
 
 ### XP sources
 
@@ -483,25 +493,47 @@ won, quest done, location discovered, check passed).
 
 ### Level curve
 
-- **Flat**: every level needs 100 XP. Level = 1 + XP / 100, so 340 XP is level 4.
-- **Max level 10** (900 XP). At level 10 the character gets a title in their
-  element (*Meisterin des Feuers*).
+- **Flat**: every level costs the same XP (see the table above).
+- **Max level 10**. At level 10 the character gets a title in their element
+  (*Meisterin des Feuers*).
 
 ### What a level-up gives
 
-- **HP**: Krieger +4, Magier +2, all others +3.
+Level-ups differ a lot between classes:
+
+| Class | HP per level | Extra |
+|---|---|---|
+| Krieger | +5 | |
+| Kleriker | +3 | |
+| Waldläufer | +3 | |
+| Schurke | +2 | |
+| Barde | +2 | |
+| Magier | +1 | *Arkaner Blitz* grows: d6 → d8 at level 4 → d10 at level 8 |
+
 - **Attributes**: +1 at levels 3, 6 and 9. The player can name the attribute
   in any message; otherwise the class's main attribute is raised. Max +5.
-- **Level 5**: second class ability (with a 3-turn cooldown, like the first).
+- **Level 5**: second class ability (below).
+- Risk to check in the simulation: a level-10 Magier has far fewer HP than a
+  Krieger (17 vs. 59). Bosses must not kill the Magier in one hit.
 
-| Class | Second ability (level 5) |
-|---|---|
-| Krieger | *Unerschütterlich*: can't drop below 1 HP this turn; enemies attack the Krieger instead of the allies. |
-| Waldläufer | *Spurlos*: the whole group moves past hostile creatures without a fight, no roll needed. |
-| Magier | *Elementarbarriere*: the group takes half damage in this turn's fight. |
-| Kleriker | *Gruppenheilung*: heals every group member by half their max HP and wakes down characters. |
-| Schurke | *Hinterhalt*: the group gets a free surprise round before the fight starts. |
-| Barde | *Heldenlied*: the whole group has advantage on all attacks and checks this turn. |
+### Second ability: choose 1 of 3
+
+At level 5 each player picks one of three second abilities of their class.
+All of them have a 3-turn cooldown, like the first ability.
+
+- The player can name their choice in any message, also before level 5.
+- When a character reaches level 5 without a choice, the chapter lists the
+  three options. If the player hasn't chosen by the next turn, one is picked
+  at random.
+
+| Class | Option 1 | Option 2 | Option 3 |
+|---|---|---|---|
+| Krieger | *Unerschütterlich*: can't drop below 1 HP this turn; enemies attack the Krieger instead of the allies | *Wirbelwind*: attacks every enemy each round this fight | *Schlachtruf*: the whole group has advantage on attacks this fight |
+| Waldläufer | *Spurlos*: the group moves past hostile creatures without a fight | *Pfeilhagel*: in round 1, a bow attack against every enemy | *Abkürzung*: the group travels two locations in one turn |
+| Magier | *Elementarbarriere*: the group takes half damage in this turn's fight | *Teleport*: the group returns to any rest point they have visited | *Erkenntnis*: ask the narrator one question about the world and get a true answer |
+| Kleriker | *Gruppenheilung*: heals every group member by half their max HP and wakes down characters | *Schutzsegen*: one ally can't drop below 1 HP this turn | *Bannkreis*: weak and normal enemies flee instead of fighting |
+| Schurke | *Hinterhalt*: a free surprise round before the fight | *Meisterdieb*: steals one item from an NPC or enemy, guaranteed (the consequences come later) | *Rauchbombe*: the whole group escapes any fight, even a boss fight |
+| Barde | *Heldenlied*: the whole group has advantage on all attacks and checks this turn | *Spottlied*: enemies have disadvantage on all attacks this fight | *Freund der Völker*: one people's attitude toward the group improves by one step, permanently |
 
 ### Element affinity
 
@@ -585,7 +617,27 @@ the player a whole day.
 Open questions: confirm or change the joining rules above; idle details; how a
 player leaves permanently.
 
-## 15. Discord output ❓
+## 15. Starting a game 💡
+
+Details of world generation follow in §11–§13. The flow:
+
+- A separate GitHub workflow **"Neues Spiel"**, started by hand with the
+  "Run workflow" button. Inputs:
+  - **Spiellänge**: Kurz / Mittel / Lang (§9).
+  - **Thema** (optional): a short hint for the world generator ("eine
+    Inselwelt", "ein Reich im ewigen Winter"). Empty = the generator decides.
+- If a game is still running, the workflow refuses to start unless the
+  "Altes Spiel archivieren" checkbox is set. The old game is then moved to
+  `archive/<date>/`, so nothing is lost.
+- The workflow generates the world (`world.json`), commits it and posts:
+  - a **prologue** in `#abenteuer` that sets the scene;
+  - the pinned **So spielst du mit** message (classes, elements, an example
+    join message);
+  - the quest log message.
+- Players join in plain language (§14) any time after the prologue. The first
+  regular turn runs the next evening.
+
+## 16. Discord output ❓
 
 💡 Channels:
 
@@ -599,7 +651,7 @@ Open questions:
 - Discord's length limits (2000 characters per message, 4096 per embed description).
 - Whether players get pinged when something important happens to them.
 
-## 16. State files and technical setup 💡
+## 17. State files and technical setup 💡
 
 Proposed repository layout:
 
@@ -620,7 +672,7 @@ src/                 # bot code (Python)
 - A `concurrency:` group in the workflow prevents two runs at once.
 - A dry-run mode for testing that posts nothing and commits nothing.
 
-## 17. Prompting and LLM safety 💡
+## 18. Prompting and LLM safety 💡
 
 - Player text is always treated as an *attempt*, never as a fact ("Ich finde ein legendäres Schwert" does not create one).
 - The Resolve step returns structured JSON only; Python validates all state changes.
