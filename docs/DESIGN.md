@@ -455,7 +455,7 @@ Every character also starts with **10 gold** and **1 Heiltrank**.
 | Schurke | Dolch | Leder | Dietriche (needed for locks) |
 | Barde | Rapier | Leder | Laute |
 
-## 9. Experience and levels 💡
+## 9. Experience and levels ✅
 
 ### Game length
 
@@ -541,29 +541,114 @@ Affinity (§6) is a second, separate progression track. It does not come from
 XP but from the world: shrines, teachers and quests of an element raise it
 by 1 (max 3). The starting element begins at 1.
 
-## 10. Death and resurrection ❓
+## 10. Death and resurrection ✅
 
-💡 Proposal from the brainstorm:
+A character dies when they reach 0 HP while alone, or when their whole group
+is down (§7).
 
-- Resurrection at the last visited rest point (*Rastplatz*), in the next turn.
-- Half of the gold and non-quest items stay behind as a **grave** where the player died.
-- The grave can be recovered; if the player dies again before that, it is lost. Other players can loot it too.
-- Quest items are never lost, so the game stays winnable.
-- Level is kept; progress toward the next level may be lost.
+### Resurrection
 
-Open questions: confirm or change each point above.
+- The character comes back **in the next turn** at the **last rest point
+  they visited** (*Rastplatz*: settlements and shrines, §11), with full HP and
+  all cooldowns reset.
+- Their group may be somewhere else by then, so dying also costs the way back.
+- If the whole group dies, enemies at that location recover fully.
 
-## 11. World, map and movement ❓
+### The grave
 
-💡 The skeleton is generated upfront and fixed; details of each location are
-generated on first visit and then stored permanently.
+- **Half of the gold** (rounded up) and **half of the bag slots** (rounded up,
+  chosen at random) stay behind as a **grave** at the place of death.
+- **Not affected**: equipped items (weapon, armour, talisman) and quest items.
+- Only the **owner** can recover the grave, by going there (a normal action
+  at that location). Other players cannot loot it.
+- If the owner dies again before recovering it, the old grave and its
+  contents are **gone for good**; the new death creates a new grave.
+- The grave is shown on the owner's character sheet (*Grab: Nebelsumpf, 23
+  Gold, 3 Gegenstände*).
 
-Open questions:
+### Experience
 
-- World size (number of regions and locations).
-- How travel works (one location per turn? distances?).
-- Whether a map is shown to players, and how.
-- How split groups meet again.
+- The level is kept. XP is reset to the start of the current level, so only
+  the progress toward the next level is lost.
+
+### No protection from death
+
+No ability prevents death directly. The down-not-dead rule (§7) and the
+healing abilities already work before it gets that far.
+
+## 11. World, map and movement 💡
+
+### Structure
+
+- The world is a **graph**: locations connected by paths, grouped into **regions**.
+- Each region has 1–2 elements (§6) and **4–6 locations**, among them at least
+  one **rest point**.
+- Plus a **start region** without element (a village and its surroundings)
+  and a **final area** with an opposite element combination.
+- World size scales with the game length (§9):
+
+| Length | Regions (without start and final area) | Locations (approx.) |
+|---|---|---|
+| Kurz | 3 | ~20 |
+| Mittel | 5 | ~32 |
+| Lang | 8 | ~50 |
+
+### Location types
+
+| Type | What it offers |
+|---|---|
+| **Siedlung** | Safe. Merchants, inn (full HP), NPCs. Always a rest point. |
+| **Schrein** | Rest point. Often raises affinity for its element (§6). |
+| **Wildnis** | Paths, creatures, hidden things. |
+| **Dungeon** | Ruins, caves, towers. Enemies, traps, loot. |
+| **Hort** | The lair of a region boss. |
+
+### Movement
+
+- Moving to a **neighbouring location** is one action (one turn).
+- No random encounters on the way. Creatures belong to locations.
+- When players arrive at a location with hostile creatures, the narrator
+  describes the threat. The **fight starts in the next turn**, so players can
+  choose: fight, sneak past, talk, or go back. Exception: creatures marked as
+  an ambush in the world file attack right away.
+- **Following**: "Ich folge Mira" moves a player to wherever Mira goes this
+  turn. Helps groups stay together.
+- *Abkürzung* (Waldläufer, §9) moves the group two locations.
+
+### Locked paths
+
+A path between two locations can have a **requirement**, checked by Python:
+
+- an item (key, artifact),
+- a completed quest step or a defeated boss,
+- an element affinity ("only someone at one with the air can cross the bridge of wind"),
+- a class trait (the Schurke opens locks, the Magier reads runes),
+- a check (a collapsed tunnel: STÄ, Schwer).
+
+That is how the main quest controls the order of the regions (§13).
+
+### Hidden paths and fog of war
+
+- Players only know **discovered locations**, plus the names of neighbouring
+  locations ("Ein Pfad führt nach Norden, zu den Nebelsümpfen").
+- Some paths are **hidden** and only found by searching. The Waldläufer's
+  passive trait gives advantage on it.
+- The map knowledge is **shared by all players**. What one discovers, everyone knows.
+
+### Generation
+
+- The skeleton (§13 for the quest part) is generated when the game starts:
+  every location with name, type, elements, connections, requirements,
+  creatures, important NPCs and important items.
+- On the **first visit**, the LLM writes the description and small details
+  (minor NPCs, scenery) and stores them permanently.
+
+### Map display
+
+- Text first: the quest log message lists the discovered regions and
+  locations and who is where.
+- Later, as an optional addition: a generated map image (e.g. with Graphviz)
+  that the bot attaches to the quest log message.
 
 ## 12. NPCs and dialogue ❓
 
