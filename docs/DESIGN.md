@@ -836,7 +836,7 @@ Proposed repository layout:
 
 ```
 data/
-  world.json         # skeleton + locations discovered so far (mostly fixed)
+  world.json         # the whole generated world, fixed (plus state notes on locations)
   state.json         # turn counter, last message ID, groups, graves, message IDs
   players/<id>.json  # one file per player
 chronik/
