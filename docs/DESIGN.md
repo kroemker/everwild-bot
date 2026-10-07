@@ -576,7 +576,7 @@ is down (§7).
 No ability prevents death directly. The down-not-dead rule (§7) and the
 healing abilities already work before it gets that far.
 
-## 11. World, map and movement 💡
+## 11. World, map and movement ✅
 
 ### Structure
 
@@ -635,13 +635,39 @@ That is how the main quest controls the order of the regions (§13).
   passive trait gives advantage on it.
 - The map knowledge is **shared by all players**. What one discovers, everyone knows.
 
-### Generation
+### Generation and fixed descriptions
 
-- The skeleton (§13 for the quest part) is generated when the game starts:
-  every location with name, type, elements, connections, requirements,
-  creatures, important NPCs and important items.
-- On the **first visit**, the LLM writes the description and small details
-  (minor NPCs, scenery) and stores them permanently.
+Everything is generated **once, when the game starts**, and then stays fixed.
+The narrator describes from these texts instead of inventing a new look for a
+location on every visit.
+
+1. Python builds the **graph**: regions, locations, types, elements,
+   connections, requirements, hidden paths. It checks that the main quest can
+   be completed (§13).
+2. The LLM fills it in, **one call per region**, so the locations of a region
+   feel like they belong together:
+   - **Region mood**: 3–4 sentences about landscape, colours, light, weather,
+     sounds and smells, shared by all locations of the region.
+   - Per location, a **fixed description**: 3–5 sentences of what it looks like.
+   - Per location, **3–5 features** (*Merkmale*): concrete things that are
+     permanently there ("ein eingestürzter Glockenturm", "ein Brunnen mit einer
+     Bronzefigur", "ein Altar aus schwarzem Glas"). Hidden items and hidden
+     paths are tied to a feature, so searching means searching *something*.
+   - Creatures, important NPCs (§12) and important items, with names and descriptions.
+3. Python validates the result (all fields present, names unique) and saves
+   it in `world.json`.
+
+### Rules for the narrator
+
+- The narrator gets the region mood, the location description and the
+  features, and must **reuse them**. It must not add new permanent features.
+- It may add **passing details** (weather, sounds, a passing cart) that are
+  not stored.
+- **Changes from events** are stored as a **state note** on the location
+  ("Die Brücke ist eingestürzt", "Das Dorf brennt"). The narrator gets the
+  fixed description plus the state notes.
+- Only the features, NPCs and items in the world file can be interacted with.
+  The Interpret step maps "Ich untersuche den Brunnen" to the feature *Brunnen*.
 
 ### Map display
 
@@ -650,13 +676,81 @@ That is how the main quest controls the order of the regions (§13).
 - Later, as an optional addition: a generated map image (e.g. with Graphviz)
   that the bot attaches to the quest log message.
 
-## 12. NPCs and dialogue ❓
+## 12. NPCs and dialogue 💡
 
-Open questions:
+### Important and minor NPCs
 
-- How much an NPC remembers (a short memory field per NPC?).
-- Whether NPCs can join the party as companions.
-- How a conversation spanning several days works.
+- **Important NPCs** are generated with the world (§11): about 2–4 per
+  settlement, plus quest givers, teachers at shrines and figures from the
+  lore. They are stored in `world.json`.
+- **Minor NPCs** (passers-by, guards, customers in the inn) are invented by
+  the narrator on the spot and not stored. If a player keeps talking to one,
+  they are stored as a minor NPC from then on.
+
+### What an important NPC has
+
+| Field | Example |
+|---|---|
+| Name, people, location | Ulma Krähenfeder, Aschvolk, Glutmarkt |
+| Role | Händlerin, Questgeberin, Lehrerin, Wächterin, … |
+| Appearance | One or two sentences, fixed |
+| Personality | "Gierig, aber ehrlich. Hasst Magier." |
+| **Way of speaking** | "Redet ohne Punkt und Komma, verkauft alles als *Rarität*." |
+| **Knowledge** | A list of facts the NPC can reveal ("Der Schlüssel zum Turm liegt beim Sumpfkönig") |
+| Wants | What the NPC wants (a reason for side quests) |
+| Attitude | Toward the players, on a 5-step scale (below) |
+| Memory | Short notes about what happened with players |
+
+The **way of speaking** is where humour comes in: some NPCs are funny, but the
+narrator around them stays serious (§1).
+
+### Knowledge controls what NPCs can say
+
+An NPC can only reveal facts from their **knowledge** list, plus general
+local colour. This stops the narrator from inventing hints that contradict
+the world file. The Barde's passive trait gives extra hints from the lore.
+
+### Attitude
+
+- 5 steps: *feindlich*, *misstrauisch*, *neutral*, *freundlich*, *verbündet*.
+- The default comes from the NPC's people (§6).
+- It changes through events and checks (persuading, helping, insulting).
+  The Barde's *Betören* and *Freund der Völker* (§9) work on it.
+- Effects: hostile NPCs don't talk and may attack; friendly ones give
+  discounts and more knowledge; allies give help or items.
+
+### Conversations
+
+- Talking is an action: the player writes what they say or ask.
+- The NPC answers in the chapter, **one exchange per turn**. A conversation
+  can go on over several days.
+- Because each exchange takes a day, NPCs answer **generously and
+  completely**: no "come back tomorrow" teasers, and as many facts per answer
+  as the question allows.
+
+### Memory
+
+- After each scene, the LLM can add short memory notes to an NPC ("Brakka
+  hat ihn beim Würfelspiel betrogen"). Python stores the last 10 per NPC.
+- The notes are sent along when a player meets the NPC again.
+
+### Companions
+
+No NPC companions in the first version. They would need their own combat
+and decision rules. Possible later.
+
+### Can NPCs die?
+
+- Players can attack NPCs (no PvP only means player against player). It has
+  consequences: the attitude of the NPC's people drops, guards react.
+- NPCs that the main quest depends on are **indispensable**: they flee or
+  are knocked out, but never die.
+
+### Merchants
+
+- Each merchant has a fixed **stock list** from the item catalog (§8),
+  chosen at generation to fit the region and its elements.
+- The stock never runs out.
 
 ## 13. Quests and the path to the end ❓
 
