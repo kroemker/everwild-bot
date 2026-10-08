@@ -676,7 +676,7 @@ location on every visit.
 - Later, as an optional addition: a generated map image (e.g. with Graphviz)
   that the bot attaches to the quest log message.
 
-## 12. NPCs and dialogue 💡
+## 12. NPCs and dialogue ✅
 
 ### Important and minor NPCs
 
@@ -752,13 +752,94 @@ and decision rules. Possible later.
   chosen at generation to fit the region and its elements.
 - The stock never runs out.
 
-## 13. Quests and the path to the end ❓
+## 13. Quests and the path to the end 💡
 
-Open questions:
+### The main quest: element shards
 
-- Structure of the main quest (e.g. 3 acts, key items that unlock the final area).
-- Side quests: pre-generated or created on the fly.
-- How the game recognizes that the final boss is beaten and the epilogue starts.
+- At game start, the LLM writes the **premise**: a threat to the world and
+  why it can only be stopped in the final area. Example: the old seal that
+  holds back a dark power is breaking; it can only be renewed with the
+  shards of the elements.
+- Every element region (§11) has a **region boss** in its *Hort*, who guards
+  a **shard** (*Splitter*), a quest item of the region's element.
+- The **gate to the final area** opens when enough shards have been brought
+  to it. Not all shards are required, so players can skip a region that is
+  too hard:
+
+| Length | Element regions | Shards needed |
+|---|---|---|
+| Kurz | 3 | 3 |
+| Mittel | 5 | 4 |
+| Lang | 8 | 6 |
+
+### Order of the regions
+
+- **Act 1**: the start region. A short intro quest that teaches the basics
+  (talking, a first fight, a first check) and ends with learning the premise.
+  Then **two regions** are open.
+- **Act 2**: the element regions. Each region has a **level** that scales its
+  enemies (§7). Shards of earlier regions (or items found there) unlock paths
+  to later ones (§11). The order is a branching tree, not a line, so split
+  groups can work on different regions at the same time.
+- **Act 3**: the final area and the final boss.
+- Python generates the region order and checks that the game can be won:
+  every requirement can be met before the lock it opens, and no shard is
+  locked behind itself.
+- The danger of a region is shown in words, not as a number ("Die Wesen
+  hier wirken uralt und gefährlich").
+
+### Quest steps
+
+Every quest is a list of **steps**, each with a condition that Python can check:
+
+| Condition | Example |
+|---|---|
+| Have an item | "Besitze den Mondschlüssel" |
+| Defeat a creature | "Besiege den Sumpfkönig" |
+| Reach a location | "Erreiche die Wolkenbrücke" |
+| Talk to an NPC | "Sprich mit Ulma Krähenfeder" (the Interpret step reports it) |
+| Bring an item to an NPC | "Bringe das Siegel zu Bruder Orm" |
+
+A typical region main quest has 2–3 steps: learn where the boss is (from an
+NPC's knowledge, §12), get past the requirement on the way to the *Hort*,
+defeat the boss and take the shard.
+
+### Side quests
+
+- **Generated with the world**, from the NPCs' wishes (§12): 1–2 per region.
+  No side quests invented during the game.
+- Rewards come from a fixed table: gold, a catalog item, **an affinity
+  increase** (§6) or a better attitude of a people.
+- A side quest is accepted by talking to the NPC. Every player in the group
+  takes part.
+
+### The quest log
+
+The pinned quest log message (§16) shows, for all players together:
+
+- shards collected (x of y needed);
+- the known steps of the main quest;
+- known side quests, and who has accepted them;
+- the discovered map (§11).
+
+### The finale
+
+- When the gate opens, **every active player** is brought to the rest point
+  of the final area in the next turn ("Die Splitter rufen euch"). Everyone
+  takes part in the finale, wherever they were.
+- The **final boss** has 2–3 phases, each in a different element, so the
+  group needs varied elements. Each phase is a normal fight (§7) of up to 3
+  rounds, so the finale takes several turns.
+- If the whole group dies, the normal death rules apply (§10) and they try again.
+
+### The end
+
+- When the final boss is defeated, Python marks the game as **finished**.
+- The LLM writes the **epilogue**: what became of the world and of each
+  character, based on the chronicle.
+- After that, a **statistics post**: most enemies defeated, most deaths, most
+  gold, most items given away, most idle days, …
+- The daily workflow stops resolving turns. The state stays in the repo.
 
 ## 14. Joining, idling and leaving ❓
 
