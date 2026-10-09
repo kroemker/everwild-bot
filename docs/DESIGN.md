@@ -752,7 +752,7 @@ and decision rules. Possible later.
   chosen at generation to fit the region and its elements.
 - The stock never runs out.
 
-## 13. Quests and the path to the end 💡
+## 13. Quests and the path to the end ✅
 
 ### The main quest: element shards
 
@@ -762,8 +762,13 @@ and decision rules. Possible later.
   shards of the elements.
 - Every element region (§11) has a **region boss** in its *Hort*, who guards
   a **shard** (*Splitter*), a quest item of the region's element.
-- The **gate to the final area** opens when enough shards have been brought
-  to it. Not all shards are required, so players can skip a region that is
+- A shard is **not carried by a player**. When a boss is defeated, its shard
+  goes straight to the shared **seal** (*Siegel*) and counts for everyone. So a
+  player who stops playing can never block the main quest with a shard in
+  their bag. (💡 proposed together with §14, to be confirmed.)
+- Locks that need shards check the shared count ("Die Brücke erscheint erst,
+  wenn zwei Splitter im Siegel ruhen").
+- The **gate to the final area** opens when enough shards are in the seal. Not all shards are required, so players can skip a region that is
   too hard:
 
 | Length | Element regions | Shards needed |
@@ -841,9 +846,9 @@ The pinned quest log message (§16) shows, for all players together:
   gold, most items given away, most idle days, …
 - The daily workflow stops resolving turns. The state stays in the repo.
 
-## 14. Joining, idling and leaving ❓
+## 14. Joining, idling and leaving 💡
 
-### Joining 💡
+### Joining
 
 Problem: the bot only reads messages once a day, so it can't answer a wrong
 join message right away. A typo or a class that doesn't exist must not cost
@@ -869,13 +874,45 @@ the player a whole day.
   LLM picks one that fits the background sentence, or Stahl. It can be changed
   during the first 3 turns, like the class.
 
-### Idling and leaving 💡
+### Idling
 
-- Idle players go along passively with their group.
-- After several idle days, the character goes to camp.
+A player is **idle** in a turn if they wrote nothing since the last turn.
 
-Open questions: confirm or change the joining rules above; idle details; how a
-player leaves permanently.
+- **In a group**: the idle character goes along when the group moves. If the
+  group splits, the idle character stays where they are.
+- **In a fight**: they defend themselves (§7).
+- **Alone**: nothing happens. The world waits (§1), so an idle character on
+  their own is never attacked.
+- Idle characters get no XP (§9) and use no items or abilities.
+- Idle players in a group are still mentioned in the chapter (§3), as a
+  gentle reminder.
+
+### Camp
+
+- After **3 idle turns in a row**, the character goes to **camp**: they leave
+  their group, are safe, don't appear in the chapter and are not mentioned.
+- The character sheet shows *Im Lager*.
+- **Coming back**: as soon as the player writes again, the character returns
+  in the same turn, and the action is carried out right away. The player
+  chooses where: where they left, or **with another player** ("Ich stoße
+  wieder zu Mira"). This one-time return to a friend is free, so coming back
+  after a holiday is easy.
+- Together with the catch-up bonus (§9), a returning player is never stuck far behind.
+
+### Leaving for good
+
+- A player can leave by writing it in plain language ("Ich verlasse das
+  Abenteuer"). The character gets a short farewell scene in the next chapter.
+- Their items stay with the character. Shards are never in a player's bag
+  (§13), so leaving can't block the main quest.
+- The character is kept in the repo. The player can come back any time, like
+  coming back from camp.
+
+### Player limit
+
+- At most **10 characters** that have not left. Characters in camp count.
+- An 11th join attempt gets a short out-of-character note in the chapter:
+  *Das Abenteuer ist voll.*
 
 ## 15. Starting a game 💡
 
