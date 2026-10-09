@@ -32,7 +32,7 @@ Legend for the status of each section:
 | Tone | Narrator: classic, serious high fantasy. NPCs speak in their own voice; some are allowed to be funny. |
 | Game end | After the final boss: an epilogue, then the game is over. The state stays in the repo. |
 | Death | Players are resurrected but lose part of their loot (details in §10). |
-| Inventory display | No daily clutter: the bot edits one message per player in place in a character sheet channel (details in §16). |
+| Inventory display | No daily clutter: the bot edits one message per player in place in a reference channel (details in §16). |
 
 ---
 
@@ -765,7 +765,7 @@ and decision rules. Possible later.
 - A shard is **not carried by a player**. When a boss is defeated, its shard
   goes straight to the shared **seal** (*Siegel*) and counts for everyone. So a
   player who stops playing can never block the main quest with a shard in
-  their bag. (💡 proposed together with §14, to be confirmed.)
+  their bag.
 - Locks that need shards check the shared count ("Die Brücke erscheint erst,
   wenn zwei Splitter im Siegel ruhen").
 - The **gate to the final area** opens when enough shards are in the seal. Not all shards are required, so players can skip a region that is
@@ -820,7 +820,7 @@ defeat the boss and take the shard.
 
 ### The quest log
 
-The pinned quest log message (§16) shows, for all players together:
+The quest log message in `#weltbuch` (§16) shows, for all players together:
 
 - shards collected (x of y needed);
 - the known steps of the main quest;
@@ -846,7 +846,7 @@ The pinned quest log message (§16) shows, for all players together:
   gold, most items given away, most idle days, …
 - The daily workflow stops resolving turns. The state stays in the repo.
 
-## 14. Joining, idling and leaving 💡
+## 14. Joining, idling and leaving ✅
 
 ### Joining
 
@@ -934,19 +934,93 @@ Details of world generation follow in §11–§13. The flow:
 - Players join in plain language (§14) any time after the prologue. The first
   regular turn runs the next evening.
 
-## 16. Discord output ❓
+## 16. Discord output 💡
 
-💡 Channels:
+### Channels
 
-- `#abenteuer`: player actions and the bot's daily chapter.
-- `#charakterbögen` (read-only): one message per player, edited in place every turn.
-- The quest log / world map as one pinned message that gets edited.
+| Channel | Who writes | Contents |
+|---|---|---|
+| `#abenteuer` | Players and bot | Player actions, the daily chapter. *So spielst du mit* is pinned here. |
+| `#weltbuch` | Bot only (read-only for players) | Reference messages that are **edited in place** every turn, never re-posted. |
 
-Open questions:
+`#weltbuch` contains, in this order:
 
-- Structure of the daily post (one message or one embed per group, headers, mentions).
-- Discord's length limits (2000 characters per message, 4096 per embed description).
-- Whether players get pinged when something important happens to them.
+1. *So spielst du mit* (classes, elements, an example join message; static).
+2. The **quest log** with the map (§13, §11).
+3. One **character sheet** per player. New players get a new message at the end.
+
+Players can mute `#weltbuch`; nothing in it needs a notification.
+
+### The daily chapter
+
+- **Plain messages, not embeds**: mentions inside embeds don't send
+  notifications, and long story text reads better as normal text.
+- One message for the day header, then **one message per group**. A group
+  section longer than 2000 characters is split at a paragraph boundary.
+- The narrator aims for **150–250 words per group**, so a section usually
+  fits in one message and stays readable on a phone.
+- Each group section starts with the location and the **mentions of the
+  players in it**, so each player is pinged once, in the part about them.
+
+Example:
+
+```
+## ☀️ Tag 12
+
+### 📍 Nebelsümpfe – Der versunkene Steg
+@Brakka @Mira
+Nebel kriecht über das schwarze Wasser, als **Brakka** den ersten Schritt
+auf die morschen Planken setzt … **Mira** hebt die Laterne …
+-# 🎲 Brakka: 14 + 3 = 17 gegen 12 → Erfolg · ⚔️ 9 Schaden
+-# 🎲 Mira: 6 + 3 = 9 gegen 12 → Fehlschlag
+-# ✨ +20 EP (Brakka, Mira) · 💰 12 Gold (Brakka) · 🎒 Frostklinge (Mira)
+-# ⬆️ Mira erreicht Stufe 5! Wähle eine Fähigkeit: Gruppenheilung, Schutzsegen oder Bannkreis.
+```
+
+- Dice, rewards, level-ups and out-of-character notes (unknown class, full
+  game) go in **subtext lines** (`-#`) at the end of a section.
+- Characters in camp are not mentioned (§14).
+
+### Confirmation reactions
+
+At the start of a turn the bot adds a ✅ reaction to every message it counted
+as part of an action. Players can see which of their messages were read,
+without any extra posts. Messages starting with `//` get no reaction.
+
+### Character sheet
+
+One embed per player in `#weltbuch` (embeds are fine here, no pings
+needed). The side colour shows the starting element.
+
+```
+Brakka · Kriegerin · 🔥 Feuer · Stufe 4 (340 / 400 EP)
+❤️ 31 / 34 LP · 🛡️ Rüstungswert 13 · 💰 57 Gold
+STÄ +4 · GES +1 · VER 0
+Affinität: 🔥 2 · 🪨 1
+Fähigkeiten: Wuchtschlag (bereit) · Schlachtruf (bereit in 2 Tagen)
+📍 Nebelsümpfe – Der versunkene Steg (mit Mira)
+Ausrüstung: Frostklinge (Schwert, selten, 💧) · Kettenhemd · Talisman der Glut
+Rucksack (4 / 10): Heiltrank ×3 · Dietriche · Rubin · Brief an Bruder Orm
+🪦 Grab: Aschefeld – 12 Gold, 2 Gegenstände
+```
+
+Status lines like *Im Lager* or *Kampfunfähig* are added when they apply.
+
+### Quest log
+
+One embed in `#weltbuch`:
+
+- the premise in one sentence;
+- the seal: shards collected (🔥 ✅ · 💧 ✅ · 🪨 ⬜ …), x of y needed;
+- the known steps of the main quest;
+- known side quests, who accepted them;
+- the map as text: each discovered region with its mood in a few words,
+  its discovered locations, and who is where.
+
+### Rate limits
+
+Discord limits how fast a bot can post and edit. With at most 10 players the
+bot simply waits briefly between requests and retries on a rate-limit answer.
 
 ## 17. State files and technical setup 💡
 
