@@ -10,7 +10,8 @@ def test_death_creates_grave_and_resets(catalog, rng, make_char):
     for base in ("rubin", "silberkette", "trophaee", "rubin"):
         add_to_bag(catalog, hero, make_item(catalog, rng, base))
     add_to_bag(catalog, hero, make_item(catalog, rng, "questgegenstand", name="Mondschlüssel"))
-    ch.set_xp(catalog, hero, 450, "mittel")
+    start = ch.level_start_xp(catalog, 5, "mittel")
+    ch.set_xp(catalog, hero, start + 50, "mittel")
     weapon = hero.equipment.waffe
 
     result = die(catalog, rng, hero, turn=12, length="mittel")
@@ -21,7 +22,7 @@ def test_death_creates_grave_and_resets(catalog, rng, make_char):
     assert len(result.grave.items) == 3
     assert any(i.name == "Mondschlüssel" for i in hero.bag)
     assert hero.equipment.waffe is weapon
-    assert hero.xp == 400 and hero.level == 5 and result.xp_lost == 50
+    assert hero.xp == start and hero.level == 5 and result.xp_lost == 50
     assert hero.location == "dorf"
     assert hero.hp == ch.max_hp(catalog, hero)
     assert hero.cooldowns == {} and not hero.down

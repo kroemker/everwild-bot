@@ -25,9 +25,9 @@
   "starting_gold": 10,
   "sell_price_fraction": 0.5,
   "game_lengths": {
-    "kurz": {"label": "Kurz", "target_turns": 30, "xp_per_level": 50, "regions": 3, "shards_needed": 3},
-    "mittel": {"label": "Mittel", "target_turns": 60, "xp_per_level": 100, "regions": 5, "shards_needed": 4},
-    "lang": {"label": "Lang", "target_turns": 100, "xp_per_level": 170, "regions": 8, "shards_needed": 6}
+    "kurz": {"label": "Kurz", "target_turns": 30, "xp_per_level": 110, "regions": 3, "shards_needed": 3},
+    "mittel": {"label": "Mittel", "target_turns": 60, "xp_per_level": 180, "regions": 5, "shards_needed": 4},
+    "lang": {"label": "Lang", "target_turns": 100, "xp_per_level": 280, "regions": 8, "shards_needed": 6}
   },
   "xp": {
     "enemy": {"schwach": 5, "normal": 10, "stark": 20, "elite": 40, "boss": 100},

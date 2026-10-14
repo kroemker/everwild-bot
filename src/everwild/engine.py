@@ -25,7 +25,7 @@ from .rules.items import (
 )
 from .scene import scene
 from .state import GameState
-from .world import Connection, Encounter, ItemSpec, LiveEnemy, Location
+from .world import Connection, Encounter, ItemSpec, LiveEnemy, Location, Quest
 
 OUTCOME_LABELS = {
     "kritischer_erfolg": "kritischer Erfolg", "erfolg": "Erfolg", "erfolg_mit_haken": "Erfolg mit Haken",
@@ -71,6 +71,12 @@ class TurnReport:
     turn: int
     groups: list[GroupReport] = field(default_factory=list)
     ooc: list[str] = field(default_factory=list)
+    announcements: list[str] = field(default_factory=list)
+    finished: bool = False
+
+
+def bump(player: Character, stat: str, amount: int = 1) -> None:
+    player.stats[stat] = player.stats.get(stat, 0) + amount
 
 
 class TurnEngine:
@@ -115,18 +121,36 @@ class TurnEngine:
                     report.ooc.append(f"{player.name} kehrt aus dem Lager zurück.")
             elif player.status == "active":
                 player.idle_streak += 1
+                bump(player, "untaetig")
                 if player.idle_streak >= self.catalog.rules.camp_after_idle_turns:
                     player.status = "camp"
                     report.ooc.append(f"{player.name} schlägt ein Lager auf und ruht, bis wieder geschrieben wird.")
+
+        self._gather_for_finale(report)
 
         for location_id, members in self._groups().items():
             group = GroupReport(location=location_id, players=[p.id for p in members])
             texts_here = {p.id: acting[p.id] for p in members if p.id in acting}
             actions = self.interpreter.actions(self.catalog, scene(self.catalog, state, location_id, members), texts_here)
             self._run_group(location_id, members, {a.player_id: a for a in actions}, group, joined)
+            self._quests(members, group)
             group.end_locations = {p.location for p in members}
             report.groups.append(group)
+        report.finished = state.finished
         return report
+
+    def _gather_for_finale(self, report: TurnReport) -> None:
+        """When the gate opens, every active player is called to the final area (§13)."""
+        world = self.world
+        if world.finale_started or not world.final_rest or len(set(world.seal)) < world.shards_needed:
+            return
+        world.finale_started = True
+        report.announcements.append(
+            "Die Splitter im Siegel erstrahlen, und ihr Ruf erreicht jede Heldin und jeden Helden, wo immer sie sind. "
+            f"Ein Sog aus Licht trägt alle nach {world.location(world.final_rest).name}.")
+        for player in self.state.active_players():
+            dummy = GroupReport(location=player.location, players=[player.id])
+            self._arrive(player, player.location, world.final_rest, dummy)
 
     def _groups(self) -> dict[str, list[Character]]:
         groups: dict[str, list[Character]] = {}
@@ -297,6 +321,7 @@ class TurnEngine:
                 if receiver is None:
                     raise ItemError("Niemand da, dem man etwas geben könnte.")
                 item = give(self.catalog, player, receiver, action.item or "")
+                bump(player, "verschenkt")
                 group.facts.append(f"{name} gibt {receiver.name} {item.name}.")
                 group.report(receiver.id).items.append(display_name(self.catalog, item))
             except ItemError as error:
@@ -352,7 +377,7 @@ class TurnEngine:
         req = con.requirement
         if req is None or con.opened:
             return True
-        companions = [m for m in members if m.location == location_id]
+        companions = members  # the group that set out together, even if some already went ahead
         if req.kind == "item":
             return any(
                 (i.base == req.item_base and (req.item_name is None or i.name == req.item_name))
@@ -365,6 +390,8 @@ class TurnEngine:
         if req.kind == "defeated":
             enc = self.world.location(req.location or location_id).encounter
             return enc is None or enc.state != "feindlich"
+        if req.kind == "shards":
+            return len(set(self.world.seal)) >= req.count
         if req.kind == "check":
             result = self._check(player, req.attribute or "staerke", req.difficulty or "mittel", group)
             if result.succeeded:
@@ -393,8 +420,12 @@ class TurnEngine:
             player.last_rest_point = destination
         if not loc.discovered:
             loc.discovered = True
+            bump(player, "orte_entdeckt")
             group.facts.append(f"{player.name} entdeckt {loc.name}.")
             self._xp(player, self.catalog.rules.xp.new_location, group)
+            for quest in self.world.quests.values():
+                if quest.kind == "haupt" and quest.region == loc.region:
+                    quest.known = True
 
     def _on_arrival(self, destination: str, arrivals: list[Character], actions: dict[str, Action],
                     group: GroupReport) -> None:
@@ -787,6 +818,7 @@ class TurnEngine:
             for pid in result.died:
                 player = self.state.players[pid]
                 outcome = die(self.catalog, self.rng, player, turn=self.state.turn, length=self.state.length)
+                bump(player, "tode")
                 group.facts.append(f"{player.name} fällt. Später erwacht {player.name} am Rastplatz "
                                    f"{self.world.location(player.location).name} – doch ein Teil der Habe bleibt im Grab zurück.")
                 group.report(pid).level_ups.append(
@@ -838,6 +870,22 @@ class TurnEngine:
         xp = encounter_xp(self.catalog, specs)
         for player in winners:
             self._xp(player, xp, group)
+            bump(player, "gegner_besiegt", sum(e.count for e in enc.enemies))
+        if enc.phase < len(enc.phases):
+            enc.phase += 1
+            enc.enemies = enc.phases[enc.phase - 1]
+            enc.state = "feindlich"
+            enc.seen_turn = self.state.turn - 1  # the next phase attacks right away next turn
+            group.facts.append(f"Doch der Kampf ist nicht vorbei: {', '.join(e.name for e in enc.enemies)} erhebt sich!")
+            return
+        if enc.shard and enc.shard not in self.world.seal:
+            self.world.seal.append(enc.shard)
+            label = self.catalog.rules.elements[enc.shard].label
+            group.facts.append(f"Der Splitter des Elements {label} löst sich aus der Asche und fliegt davon, zum Siegel. "
+                               f"({len(set(self.world.seal))} von {self.world.shards_needed} Splittern ruhen nun im Siegel.)")
+        if location_id == self.world.final_location:
+            self.state.finished = True
+            group.facts.append("Die letzte Finsternis weicht. Das Siegel ist erneuert – das Abenteuer ist vollbracht.")
         loot = self.catalog.loot
         region = self.world.region_of(location_id)
         gold = 0
@@ -862,11 +910,84 @@ class TurnEngine:
         for n, player in enumerate(winners):
             amount = share + (1 if n < rest else 0)
             player.gold += amount
+            bump(player, "gold_erbeutet", amount)
             group.report(player.id).gold += amount
         for item in items:
             receiver = self.rng.choice(winners)
             self._give_item(receiver, item, location_id, group)
             group.facts.append(f"Beute: {receiver.name} erhält {item.name}.")
+
+    # --- quests ------------------------------------------------------------------
+
+    def _quests(self, members: list[Character], group: GroupReport) -> None:
+        present = [m for m in members if m.status == "active"]
+        talked = {t["npc"] for t in group.talks}
+        for quest in self.world.quests.values():
+            if quest.done:
+                continue
+            if quest.kind == "neben" and quest.giver in talked:
+                new = [m.id for m in present if m.id not in quest.accepted_by]
+                if new:
+                    quest.accepted_by += new
+                    quest.known = True
+                    group.facts.append(f"{self.world.npcs[quest.giver].name} bittet um Hilfe: {quest.name}.")
+            if quest.kind == "neben" and not any(m.id in quest.accepted_by for m in present):
+                continue
+            while (step := quest.next_step()) is not None and self._step_done(step, present, talked):
+                step.done = True
+                quest.known = True
+                group.facts.append(f"Fortschritt – {quest.name}: {step.text}")
+                if quest.kind == "haupt" and step.kind != "talk":
+                    for player in present:
+                        self._xp(player, self.catalog.rules.xp.main_quest_step, group)
+            if quest.next_step() is None:
+                self._complete(quest, present, group)
+
+    def _step_done(self, step, present: list[Character], talked: set[str]) -> bool:
+        if step.kind == "item":
+            return any(i.name == step.item_name for m in present for i in ch.all_items(m))
+        if step.kind == "defeat":
+            enc = self.world.location(step.location).encounter
+            return enc is None or enc.state != "feindlich"
+        if step.kind == "reach":
+            return any(m.location == step.location for m in present)
+        if step.kind == "talk":
+            return step.npc in talked
+        if step.kind == "deliver" and step.npc in talked:
+            for member in present:
+                item = next((i for i in member.bag if i.name == step.item_name), None)
+                if item is not None:
+                    remove_from_bag(member, item.id, item.quantity)
+                    return True
+        return False
+
+    def _complete(self, quest: Quest, present: list[Character], group: GroupReport) -> None:
+        quest.done = True
+        group.facts.append(f"Auftrag erfüllt: {quest.name}.")
+        if quest.kind == "haupt":
+            return
+        helpers = [m for m in present if m.id in quest.accepted_by] or present
+        reward = quest.reward
+        for player in helpers:
+            self._xp(player, self.catalog.rules.xp.side_quest, group)
+            bump(player, "auftraege")
+            if reward.affinity and el.gain_affinity(self.catalog, player, reward.affinity):
+                label = self.catalog.rules.elements[reward.affinity].label
+                group.report(player.id).level_ups.append(f"Affinität {label} {player.affinity[reward.affinity]}")
+        if reward.gold:
+            share, rest = divmod(reward.gold, len(helpers))
+            for n, player in enumerate(helpers):
+                amount = share + (1 if n < rest else 0)
+                player.gold += amount
+                group.report(player.id).gold += amount
+        if reward.item:
+            self._give_item(helpers[0], self._make(reward.item), helpers[0].location, group)
+        if reward.people and reward.people in self.world.peoples:
+            people = self.world.peoples[reward.people]
+            people.attitude = min(2, people.attitude + 1)
+            for npc in self.world.npcs.values():
+                if npc.people == people.id:
+                    npc.attitude = min(2, npc.attitude + 1)
 
     # --- XP ----------------------------------------------------------------------
 

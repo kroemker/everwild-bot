@@ -65,6 +65,9 @@ def narration_payload(catalog: Catalog, state: GameState, group: GroupReport) ->
                     "wesen": npc.personality, "sprechweise": npc.speech, "wissen": npc.knowledge,
                     "wuensche": npc.wants, "haltung": attitude_label(npc.attitude), "erinnerungen": npc.memory},
             "spieler": talk["spieler"], "sagt": talk["sagt"], "ueberzeugt": talk["ueberzeugt"],
+            "auftraege": [{"name": quest.name, "naechster_schritt": quest.next_step().text}
+                          for quest in world.quests.values()
+                          if quest.giver == npc.id and not quest.done and quest.next_step()],
         })
     payload = {
         "ort": _location(state, group.location),
@@ -135,3 +138,19 @@ def update_summary(state: GameState, report: TurnReport, llm: LLM | None) -> Non
         return
     payload = f"Bisherige Zusammenfassung:\n{state.summary or '(noch keine)'}\n\nKapitel von Tag {report.turn}:\n{chapters}"
     state.summary = llm.text(prompt("summary"), payload, max_tokens=1500).strip()
+
+
+def epilogue(catalog: Catalog, state: GameState, llm: LLM | None) -> str:
+    players = [p for p in state.players.values() if p.status != "left" or p.stats]
+    if llm is None:
+        lines = [f"## 📖 Epilog", f"Das Siegel von {state.world.name} ist erneuert. {state.summary[-600:]}"]
+        for player in players:
+            lines.append(f"**{player.name}**, {player.class_label} der Stufe {player.level}, kehrt als Heldin oder Held heim.")
+        return "\n\n".join(lines)
+    payload = {
+        "welt": {"name": state.world.name, "praemisse": state.world.premise},
+        "chronik": state.summary,
+        "figuren": [{"name": p.name, "klasse": p.class_label, "element": p.element, "hintergrund": p.background,
+                     "stufe": p.level, "taten": p.stats} for p in players],
+    }
+    return "## 📖 Epilog\n\n" + llm.text(prompt("epilogue"), json.dumps(payload, ensure_ascii=False), max_tokens=3000).strip()

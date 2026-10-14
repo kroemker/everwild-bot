@@ -554,11 +554,12 @@ length scale with it too (§11, §13).
 
 | Length | Target turns | XP per level | Level 10 at |
 |---|---|---|---|
-| Kurz | ~30 | 50 | 450 XP |
-| Mittel | ~60 | 100 | 900 XP |
-| Lang | ~100 | 170 | 1530 XP |
+| Kurz | ~30 | 110 | 990 XP |
+| Mittel | ~60 | 180 | 1620 XP |
+| Lang | ~100 | 280 | 2520 XP |
 
-Exact numbers get tuned with the simulation script.
+Tuned to the XP a generated world actually holds (fights, quests,
+discoveries), assuming a player experiences about 70 % of it.
 
 ### XP sources
 
@@ -569,7 +570,7 @@ won, quest done, location discovered, check passed).
 |---|---|---|
 | Fight won, per enemy tier | Schwach 5, Normal 10, Stark 20, Elite 40, Boss 100 | Every player who took part, full amount (not split) |
 | Side quest completed | 30 | Every player who took part |
-| Main quest step completed | 60 | Every player who took part |
+| Main quest step completed (not for conversation steps) | 60 | Every player who took part |
 | New location discovered | 5 | Every player in the group |
 | Hard check passed | Schwer 5, Heroisch 10 | The player who rolled |
 
@@ -745,7 +746,42 @@ location on every visit.
 3. Python validates the result (all fields present, names unique) and saves
    it in `world.json`.
 
-### Rules for the narrator
+### Generated layout (implemented)
+
+The generator (`src/everwild/worldgen.py`) works in four stages:
+
+1. **Skeleton (Python)**: every element region gets the same proven layout:
+
+   | Location | Type | Contents |
+   |---|---|---|
+   | Eingang | Wildnis | Standard fight; a lost item for a side quest |
+   | Siedlung | Settlement, rest point | Sage (knows the boss, the key and the hidden path), merchant, petitioner |
+   | Wildnis | Wildnis | Standard fight (hard from the second tier on); a feature hides the path to the shrine |
+   | Schrein | Shrine, rest point, hidden | Raises affinity for the region's element |
+   | Verlies | Dungeon | Hard fight (elite later); a feature hides the key to the lair |
+   | Hort | Lair, locked by the key | Region boss with the shard and a rare weapon |
+
+   The start region has a village (elder, merchant), an easy first fight and
+   the road to the gate. Regions come in tiers of two; tier 0 opens from the
+   start region, every later tier needs one more shard. The gate to the final
+   area needs all required shards; the final boss has 2 (Kurz) or 3 phases,
+   each in another element.
+2. **Naming**: the LLM names everything, one call per region, by id (prompt
+   `prompts/worldgen.md`). Without an LLM, word lists in
+   `catalog/worldgen.json` are used; they also fill anything the LLM leaves out.
+3. **Finalize (Python)**: NPC knowledge, lock texts and quest step texts are
+   written from the final names, so every hint matches the structure. Names
+   in these texts stand in German quotation marks („…“), which reads correctly
+   in any grammatical case.
+4. **Check**: the world is explored like a party that wins every fight; all
+   locations, enough shards and the final boss must be reachable.
+
+Quests per element region: the main quest (ask the sage → find the key →
+defeat the boss), a fetch quest (find the lost item → bring it back; reward:
+gold and a better attitude of the people) and a hunt (clear the wilderness;
+reward: gold and affinity).
+
+
 
 - The narrator gets the region mood, the location description and the
   features, and must **reuse them**. It must not add new permanent features.

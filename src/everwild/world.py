@@ -43,7 +43,7 @@ class Feature(BaseModel):
 class Requirement(BaseModel):
     """What a locked path needs (§11). ``text`` explains it in German."""
 
-    kind: Literal["item", "affinity", "class", "check", "defeated"]
+    kind: Literal["item", "affinity", "class", "check", "defeated", "shards"]
     text: str
     item_base: str | None = None
     item_name: str | None = None
@@ -53,6 +53,7 @@ class Requirement(BaseModel):
     attribute: Attribute | None = None
     difficulty: str | None = None
     location: str | None = None  # "defeated": the encounter at this location
+    count: int = 0  # "shards": how many shards must rest in the seal
 
 
 class Connection(BaseModel):
@@ -95,6 +96,9 @@ class Encounter(BaseModel):
     seen_turn: int | None = None  # when players first saw the threat
     live: list[LiveEnemy] = Field(default_factory=list)  # running fight
     loot: ItemSpec | None = None  # a guaranteed drop (bosses)
+    shard: Element | None = None  # region bosses guard an element shard (§13)
+    phases: list[list[EnemyEntry]] = Field(default_factory=list)  # final boss: further phases
+    phase: int = 0
 
 
 class Location(BaseModel):
@@ -149,6 +153,41 @@ class NPC(BaseModel):
     alive: bool = True
 
 
+class QuestStep(BaseModel):
+    """One step with a condition Python can check (§13)."""
+
+    id: str
+    text: str
+    kind: Literal["item", "defeat", "reach", "talk", "deliver"]
+    location: str | None = None  # defeat / reach
+    npc: str | None = None  # talk / deliver
+    item_name: str | None = None  # item / deliver
+    done: bool = False
+
+
+class Reward(BaseModel):
+    gold: int = 0
+    item: ItemSpec | None = None
+    affinity: Element | None = None
+    people: str | None = None  # attitude +1
+
+
+class Quest(BaseModel):
+    id: str
+    name: str
+    kind: Literal["haupt", "neben"]
+    region: str
+    giver: str | None = None
+    steps: list[QuestStep]
+    reward: Reward = Field(default_factory=Reward)
+    accepted_by: list[str] = Field(default_factory=list)
+    known: bool = False
+    done: bool = False
+
+    def next_step(self) -> QuestStep | None:
+        return next((step for step in self.steps if not step.done), None)
+
+
 class World(BaseModel):
     name: str
     premise: str
@@ -157,6 +196,12 @@ class World(BaseModel):
     locations: dict[str, Location]
     npcs: dict[str, NPC] = Field(default_factory=dict)
     peoples: dict[str, People] = Field(default_factory=dict)
+    quests: dict[str, Quest] = Field(default_factory=dict)
+    seal: list[Element] = Field(default_factory=list)  # shards brought to the seal
+    shards_needed: int = 0
+    final_rest: str | None = None  # where everyone gathers for the finale
+    final_location: str | None = None  # the final boss
+    finale_started: bool = False
 
     def location(self, location_id: str) -> Location:
         return self.locations[location_id]
@@ -185,6 +230,17 @@ class World(BaseModel):
             for feature in loc.features:
                 if feature.hidden_path and not any(c.to == feature.hidden_path and c.hidden for c in loc.connections):
                     raise ValueError(f"{loc.id}/{feature.id}: kein versteckter Weg nach {feature.hidden_path}")
+        for quest in self.quests.values():
+            if quest.region not in self.regions:
+                raise ValueError(f"Quest {quest.id}: unbekannte Region {quest.region}")
+            for step in quest.steps:
+                if step.location and step.location not in self.locations:
+                    raise ValueError(f"Quest {quest.id}: unbekannter Ort {step.location}")
+                if step.npc and step.npc not in self.npcs:
+                    raise ValueError(f"Quest {quest.id}: unbekannter NSC {step.npc}")
+        for ref in (self.final_rest, self.final_location):
+            if ref and ref not in self.locations:
+                raise ValueError(f"Unbekannter Ort für das Finale: {ref}")
 
 
 def attitude_label(value: int) -> str:

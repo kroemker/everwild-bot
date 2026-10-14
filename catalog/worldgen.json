@@ -1,0 +1,67 @@
+{
+  "world_names": ["Everwild", "Die Splitterlande", "Das Alte Reich", "Aldermark", "Die Sieben Täler"],
+  "premises": [
+    "Das alte Siegel, das die Finsternis unter der Welt bannt, bekommt Risse. Nur die Splitter der Elemente können es erneuern.",
+    "Seit der Nacht der fallenden Sterne zerfällt das Gleichgewicht der Elemente. Wer die Splitter zum Siegel bringt, kann die Welt retten.",
+    "Ein uralter Fürst der Leere erwacht unter dem Siegel. Die Hüter der Elemente sind gefallen, ihre Splitter verstreut."
+  ],
+  "region_names": {
+    "feuer": ["Glutberge", "Aschenfelder", "Flammenschlund", "Rußhöhen"],
+    "wasser": ["Nebelsümpfe", "Frostfjorde", "Tränensee", "Eisküste"],
+    "erde": ["Dornenwald", "Steinwüste", "Wurzelhöhlen", "Moosgrund"],
+    "luft": ["Sturmklippen", "Windebene", "Wolkenhöhen", "Donnergrat"],
+    "licht": ["Sonnenhain", "Goldene Steppe", "Morgenlande", "Lichtauen"],
+    "schatten": ["Schattentäler", "Nachtmoor", "Totenforst", "Dämmerschlucht"],
+    "start": ["Tal von Dornbach", "Eschenhain", "Grüne Mark"],
+    "final": ["Herz des Siegels", "Der Riss", "Thron der Leere"]
+  },
+  "moods": {
+    "feuer": "Schwarzer Fels, glühende Risse im Boden, Ascheregen. Die Luft flimmert vor Hitze und schmeckt nach Schwefel.",
+    "wasser": "Graues Wasser, Nebelbänke und Eis an den Ufern. Es tropft und gluckert überall, und die Kälte kriecht in die Knochen.",
+    "erde": "Uralte Bäume, moosbedeckte Felsen und Höhlen, die tief in die Erde führen. Es riecht nach nassem Laub und Stein.",
+    "luft": "Kahle Höhen unter einem endlosen Himmel. Der Wind heult ohne Pause, und in der Ferne grollt Donner.",
+    "licht": "Goldene Wiesen, weiße Tempelruinen und ein Licht, das nie ganz verlischt. Selbst die Schatten sind hier blass.",
+    "schatten": "Ewige Dämmerung, kahle Bäume und Nebel, der Stimmen zu tragen scheint. Kein Vogel singt hier.",
+    "start": "Sanfte Hügel, Felder voller Gerste, ein Wald aus alten Eichen. Abends riecht es nach Holzfeuer und frischem Brot.",
+    "final": "Ein Ort zwischen den Elementen: Feuer brennt unter Eis, Licht fällt in bodenlose Schatten. Die Welt selbst scheint hier dünn zu werden."
+  },
+  "settlements": ["Dornbach", "Eschenfurt", "Kranichsruh", "Moosbrück", "Weidenau", "Falkenstein", "Rabenhorst", "Lindweiler", "Tannfeld", "Steinach"],
+  "wild_names": {
+    "feuer": ["Aschehang", "Glutpfad", "Rußwald", "Schlackenfeld", "Lavafluss"],
+    "wasser": ["Schilfmeer", "Frostufer", "Nebelsteg", "Eisfälle", "Moorpfad"],
+    "erde": ["Wurzelpfad", "Felsenschlucht", "Dornengestrüpp", "Moosklamm", "Steinkreis"],
+    "luft": ["Windkante", "Sturmpass", "Krähenfelsen", "Wolkensteig", "Donnerheide"],
+    "licht": ["Sonnenwiese", "Goldhang", "Lichtung der Lerchen", "Weiße Furt", "Strahlenpfad"],
+    "schatten": ["Raunende Senke", "Galgenhügel", "Nebelgrund", "Knochenpfad", "Schwarzwasser"],
+    "stahl": ["Alter Hohlweg", "Finsterwald", "Wolfsheide", "Hünengrab", "Mühlenbach"]
+  },
+  "dungeons": ["Verfallene Feste", "Verlassene Mine", "Versunkene Krypta", "Turm des Alchemisten", "Höhle der Echos", "Alte Zwergenhalle"],
+  "shrine_names": {
+    "feuer": "Schrein der ewigen Glut", "wasser": "Schrein der stillen Quelle", "erde": "Schrein der alten Wurzel",
+    "luft": "Schrein der vier Winde", "licht": "Schrein der Morgenröte", "schatten": "Schrein der Dämmerung"
+  },
+  "creatures": {
+    "feuer": {"schwach": "Glutkäfer", "normal": "Aschehund", "stark": "Lavatroll", "elite": "Flammenritter", "boss": "Glutfürst"},
+    "wasser": {"schwach": "Irrlicht", "normal": "Moorschleicher", "stark": "Eisbär", "elite": "Frosthexe", "boss": "Sumpfkönig"},
+    "erde": {"schwach": "Dornenratte", "normal": "Steinkriecher", "stark": "Felsgolem", "elite": "Wurzelhüter", "boss": "Uralter Baumhirte"},
+    "luft": {"schwach": "Sturmkrähe", "normal": "Harpyie", "stark": "Donnergreif", "elite": "Windgeist", "boss": "Herr der Stürme"},
+    "licht": {"schwach": "Irrfunke", "normal": "Sonnenwächter", "stark": "Lichtkoloss", "elite": "Gefallener Paladin", "boss": "Blendender Seraph"},
+    "schatten": {"schwach": "Nachtfledermaus", "normal": "Schattenwolf", "stark": "Grabschrecken", "elite": "Todesritter", "boss": "Fürst der Dämmerung"},
+    "stahl": {"schwach": "Riesenratte", "normal": "Grauwolf", "stark": "Oger", "elite": "Raubritter", "boss": "Banditenkönig"}
+  },
+  "final_boss": ["Der Verschlinger", "Die Leere", "Der Namenlose"],
+  "key_items": ["Mondschlüssel", "Siegelstein", "Fährmannsmünze", "Runenstab", "Knochenschlüssel", "Sternenkompass", "Kristallauge"],
+  "quest_items": ["Silbernes Medaillon", "Verlorenes Tagebuch", "Großvaters Pfeife", "Blaue Feder", "Verbeulte Krone", "Brief ohne Absender"],
+  "first_names": ["Hedda", "Orm", "Ilsabe", "Garrick", "Wendelin", "Mareike", "Tobold", "Rufus", "Agnes", "Lioba", "Konrad", "Fenja",
+                  "Ulma", "Berthold", "Sigrun", "Alrik", "Grizzelda", "Hinnerk", "Walburga", "Jorin", "Ottilie", "Bruno"],
+  "last_names": ["Kesselflick", "Krähenfeder", "Eisenhut", "Moosbart", "Silberzunge", "Dornbusch", "Graufell", "Hammerschlag",
+                 "Wurzelfuß", "Sturmauge", "Brennessel", "Tintenfass"],
+  "personalities": ["Herzlich und neugierig.", "Misstrauisch, aber gerecht.", "Gierig, aber ehrlich.", "Müde und gütig.",
+                    "Stolz und aufbrausend.", "Ängstlich und geschwätzig.", "Verschlagen, aber nicht böse.", "Weise und geduldig."],
+  "speech": ["Redet ohne Punkt und Komma.", "Spricht in Rätseln und alten Sprichwörtern.", "Kichert und spricht von sich in der dritten Person.",
+             "Flucht bei jedem zweiten Satz.", "Spricht sehr förmlich und altertümlich.", "Wiederholt das letzte Wort jedes Satzes, jedes Satzes.",
+             "Reimt, wann immer es geht.", "Antwortet am liebsten mit Gegenfragen.", "Brummt einsilbig.", "Verkauft alles als „Rarität“."],
+  "appearances": ["Rund, rotwangig, mit mehligen Händen.", "Gebeugt, mit milchigen Augen und einem Stock aus schwarzem Holz.",
+                  "Hager, mit einem Bart bis zum Gürtel.", "Klein und flink, mit Tintenflecken an den Fingern.",
+                  "Breitschultrig, mit einer Narbe quer über die Nase.", "Elegant gekleidet, mit einem Monokel."]
+}

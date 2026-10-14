@@ -37,6 +37,10 @@ def test_attack_profiles(catalog, make_char):
     assert ch.attack_profile(catalog, make_char("waldlaeufer", element="stahl")).attribute == "geschick"
 
 
+def xp(catalog, level, length="mittel"):
+    return ch.level_start_xp(catalog, level, length)
+
+
 def test_magier_spell_grows_and_uses_element(catalog, make_char):
     magier = make_char("magier", element="feuer")
     profile = ch.attack_profile(catalog, magier)
@@ -46,20 +50,21 @@ def test_magier_spell_grows_and_uses_element(catalog, make_char):
     assert profile.damage_bonus == 4
     # VER 3 + affinity 1 in the spell's element
     assert profile.attack_bonus == 4
-    ch.set_xp(catalog, magier, 300, "mittel")
+    ch.set_xp(catalog, magier, xp(catalog, 4), "mittel")
     assert ch.attack_profile(catalog, magier).dice == "1d8"
-    ch.set_xp(catalog, magier, 700, "mittel")
+    ch.set_xp(catalog, magier, xp(catalog, 8), "mittel")
     assert ch.attack_profile(catalog, magier).dice == "1d10"
 
 
 def test_levels_follow_game_length(catalog, make_char):
     hero = make_char("krieger")
-    events = ch.set_xp(catalog, hero, 340, "mittel")
+    events = ch.set_xp(catalog, hero, xp(catalog, 4) + 40, "mittel")
     assert hero.level == 4
     assert [e.level for e in events] == [2, 3, 4]
     assert ch.max_hp(catalog, hero) == 14 + 3 * 5
     assert hero.hp == ch.max_hp(catalog, hero)
-    assert ch.level_for_xp(catalog, 340, "kurz") == 7
+    per_level = catalog.rules.game_lengths["kurz"].xp_per_level
+    assert ch.level_for_xp(catalog, 3 * per_level + 1, "kurz") == 4
     assert ch.level_for_xp(catalog, 99999, "lang") == 10
 
 
@@ -67,18 +72,18 @@ def test_hp_per_level_differs_by_class(catalog, make_char):
     for class_id, gain in (("krieger", 5), ("kleriker", 3), ("waldlaeufer", 3),
                            ("schurke", 2), ("barde", 2), ("magier", 1)):
         hero = make_char(class_id)
-        ch.set_xp(catalog, hero, 100, "mittel")
+        ch.set_xp(catalog, hero, xp(catalog, 2), "mittel")
         assert ch.max_hp(catalog, hero) - catalog.classes[class_id].hp == gain
 
 
 def test_attribute_increase_uses_choice_or_main_attribute(catalog, make_char):
     default = make_char("schurke")
-    ch.set_xp(catalog, default, 200, "mittel")
+    ch.set_xp(catalog, default, xp(catalog, 3), "mittel")
     assert default.attribute_increases == ["geschick"]
 
     chosen = make_char("schurke")
     chosen.attribute_choice = "verstand"
-    ch.set_xp(catalog, chosen, 200, "mittel")
+    ch.set_xp(catalog, chosen, xp(catalog, 3), "mittel")
     assert chosen.attribute_increases == ["verstand"]
     assert chosen.attribute_choice is None
 
@@ -92,14 +97,14 @@ def test_attributes_are_capped(catalog, make_char):
 def test_second_ability_chosen_in_advance(catalog, make_char):
     hero = make_char("kleriker")
     ch.choose_second_ability(catalog, hero, "schutzsegen")
-    events = ch.set_xp(catalog, hero, 400, "mittel")
+    events = ch.set_xp(catalog, hero, xp(catalog, 5), "mittel")
     assert hero.abilities == ["heilung", "schutzsegen"]
     assert events[-1].ability_granted == "schutzsegen"
 
 
 def test_second_ability_offered_then_random(catalog, rng, make_char):
     hero = make_char("barde")
-    events = ch.set_xp(catalog, hero, 400, "mittel", turn=10)
+    events = ch.set_xp(catalog, hero, xp(catalog, 5), "mittel", turn=10)
     assert events[-1].ability_offered == catalog.classes["barde"].second_abilities
     assert ch.resolve_pending_ability(catalog, rng, hero, turn=10) is None
     granted = ch.resolve_pending_ability(catalog, rng, hero, turn=11)

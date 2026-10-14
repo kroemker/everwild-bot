@@ -265,3 +265,5 @@ class Character(BaseModel):
     down: bool = False
     idle_streak: int = 0
     grave: Grave | None = None
+    # counters for the statistics post at the end (§13)
+    stats: dict[str, int] = Field(default_factory=dict)

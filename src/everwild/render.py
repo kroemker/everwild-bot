@@ -48,7 +48,7 @@ def result_lines(catalog: Catalog, state: GameState, group: GroupReport) -> list
 
 
 def chapter_text(catalog: Catalog, state: GameState, report: TurnReport, mention=lambda p: f"@{p.name}") -> str:
-    out = [f"## ☀️ Tag {report.turn}"]
+    out = [f"## ☀️ Tag {report.turn}"] + [f"*{text}*" for text in report.announcements]
     for group in report.groups:
         players = [state.players[p] for p in group.players if p in state.players]
         ends = group.end_locations or {group.location}
@@ -122,4 +122,55 @@ def map_text(state: GameState) -> str:
             marks = (" 🛏️" if loc.rest_point else "") + (" ⚠️" if loc.encounter and loc.encounter.state == "feindlich" and loc.encounter.seen_turn else "")
             exits = ", ".join(world.location(c.to).name for c in world.visible_connections(loc.id))
             lines.append(f"- {loc.name}{marks}" + (f" – {', '.join(here)}" if here else "") + f"  → {exits}")
+    return "\n".join(lines)
+
+
+def quest_log_text(catalog: Catalog, state: GameState) -> str:
+    world = state.world
+    elements = catalog.rules.elements
+    shards = []
+    for plan_region in world.regions.values():
+        if not plan_region.elements or plan_region.id == "final":
+            continue
+        element = plan_region.elements[0]
+        shards.append(f"{elements[element].emoji} {'✅' if element in world.seal else '⬜'}")
+    lines = [f"📜 **{world.name}**", world.premise]
+    if shards:
+        lines.append(f"**Siegel**: {' · '.join(shards)} ({len(set(world.seal))} / {world.shards_needed} Splitter)")
+    for quest in world.quests.values():
+        if not quest.known:
+            continue
+        icon = "✅" if quest.done else ("⭐" if quest.kind == "haupt" else "📌")
+        line = f"{icon} **{quest.name}**"
+        if quest.kind == "neben" and quest.accepted_by:
+            names = [state.players[p].name for p in quest.accepted_by if p in state.players]
+            line += f" ({', '.join(names)})"
+        lines.append(line)
+        if not quest.done:
+            for step in quest.steps:
+                lines.append(f"  {'✔' if step.done else '▫'} {step.text}")
+                if not step.done:
+                    break
+    return "\n".join(lines)
+
+
+STAT_LABELS = [
+    ("gegner_besiegt", "Die meisten besiegten Gegner"),
+    ("tode", "Die meisten Tode"),
+    ("gold_erbeutet", "Das meiste erbeutete Gold"),
+    ("verschenkt", "Die meisten verschenkten Gegenstände"),
+    ("auftraege", "Die meisten erfüllten Aufträge"),
+    ("orte_entdeckt", "Die meisten entdeckten Orte"),
+    ("untaetig", "Die meisten untätigen Tage"),
+]
+
+
+def stats_text(state: GameState) -> str:
+    players = list(state.players.values())
+    lines = [f"## 🏆 Die Chronik in Zahlen – {state.turn} Tage"]
+    for key, label in STAT_LABELS:
+        best = max(players, key=lambda p: p.stats.get(key, 0), default=None)
+        if best is not None and best.stats.get(key, 0) > 0:
+            lines.append(f"**{label}**: {best.name} ({best.stats[key]})")
+    lines.append("**Höchste Stufe**: " + ", ".join(f"{p.name} ({p.level})" for p in sorted(players, key=lambda p: -p.level)[:3]))
     return "\n".join(lines)
