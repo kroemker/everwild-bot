@@ -1016,7 +1016,9 @@ the mockup.
 - Author line: class and element. Title: name and level.
 - Two full-width **bars** (10 segments each): ❤️ HP and ✨ XP toward the next level.
 - Fields grid:
-  - row 1: 🛡️ Rüstungswert (10 + armour + shield + class bonus, §7), 💰 Gold;
+  - row 1: ⚔️ Schaden (damage of the equipped weapon: die + attribute +
+    rarity bonus, e.g. *d8 + 4*; for the Magier, the Arkaner Blitz if it is
+    stronger), 🛡️ Rüstungswert (10 + armour + shield + class bonus, §7), 💰 Gold;
   - row 2: Attribute, Affinität, Fähigkeiten (with cooldown: ✔ or ⏳ n Tage);
   - full width: Ausrüstung, Rucksack (x / 10), 🪦 Grab (only when there is one).
 - Footer: 📍 location and who else is there (can get long, so it goes last).
@@ -1029,7 +1031,7 @@ Kriegerin · 🔥 Feuer
 Brakka · Stufe 5
 ❤️ 🟥🟥🟥🟥🟥🟥🟥🟥⬛⬛ 27 / 34 LP
 ✨ 🟨🟨🟨🟨⬛⬛⬛⬛⬛⬛ 440 / 500 EP
-🛡️ Rüstungswert 14 | 💰 Gold 57
+⚔️ Schaden d8 + 4 | 🛡️ Rüstungswert 14 | 💰 Gold 57
 Attribute: STÄ +4 · GES +1 · VER 0 | Affinität: 🔥 2 · 🪨 1 | Fähigkeiten: Wuchtschlag ✔ · Schlachtruf ⏳ 2 Tage
 Ausrüstung: Schwert · Schild · Kettenhemd · Talisman der Glut
 Rucksack (4 / 10): Heiltrank ×3 · Dietriche · Rubin · Brief an Bruder Orm
