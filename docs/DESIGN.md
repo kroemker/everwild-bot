@@ -820,7 +820,7 @@ defeat the boss and take the shard.
 
 ### The quest log
 
-The quest log message in `#weltbuch` (§16) shows, for all players together:
+The quest log message in the 📖 Weltbuch thread (§16) shows, for all players together:
 
 - shards collected (x of y needed);
 - the known steps of the main quest;
@@ -854,7 +854,7 @@ Problem: the bot only reads messages once a day, so it can't answer a wrong
 join message right away. A typo or a class that doesn't exist must not cost
 the player a whole day.
 
-- A pinned message in `#abenteuer`, *So spielst du mit*, lists the classes
+- The pinned message in `#abenteuer`, *So spielst du mit*, lists the classes
   and an example join message.
 - Joining is written in plain language, no strict syntax ("Ich bin Brakka,
   eine Kriegerin. Eine vernarbte Söldnerin aus dem Norden."). The LLM extracts
@@ -936,20 +936,33 @@ Details of world generation follow in §11–§13. The flow:
 
 ## 16. Discord output 💡
 
-### Channels
+### One channel, one thread
 
-| Channel | Who writes | Contents |
-|---|---|---|
-| `#abenteuer` | Players and bot | Player actions, the daily chapter. *So spielst du mit* is pinned here. |
-| `#weltbuch` | Bot only (read-only for players) | Reference messages that are **edited in place** every turn, never re-posted. |
+The server is shared with people who don't play, so the game uses **only one
+channel**, `#abenteuer`, and no new channels.
 
-`#weltbuch` contains, in this order:
+- Players write their actions there; the bot posts the daily chapter there.
+- The pinned message *So spielst du mit* (classes, elements, an example join
+  message) has a **thread** attached: **📖 Weltbuch**. It holds the reference
+  messages, which are **edited in place** every turn, never re-posted:
+  1. the **quest log** with the map (§13, §11);
+  2. one **character sheet** per player (new players get a new message at the end).
+- The thread is **locked**, so only the bot writes in it, and players can
+  mute it. Edits in a thread don't notify anyone.
+- Threads archive themselves after a week without activity; the bot simply
+  unarchives it before editing each turn.
+- The bot sets the **channel topic** to a one-line status:
+  *Tag 12 · nächste Runde ca. 20 Uhr · Siegel: 2 / 4 Splitter*.
+- Needed bot permissions on the channel: view, read history, send messages,
+  add reactions, create public threads, send messages in threads, manage
+  threads (to lock and unarchive), manage messages (to pin), manage channel
+  (for the topic).
 
-1. *So spielst du mit* (classes, elements, an example join message; static).
-2. The **quest log** with the map (§13, §11).
-3. One **character sheet** per player. New players get a new message at the end.
+**Non-players** in the channel: a message from someone without a character
+is ignored unless it is a join message (§14). (Open: whether to also limit
+joining to an allowlist of Discord users.)
 
-Players can mute `#weltbuch`; nothing in it needs a notification.
+Mockups of the layout: [`docs/mockups/discord-output.html`](mockups/discord-output.html).
 
 ### The daily chapter
 
@@ -962,7 +975,8 @@ Players can mute `#weltbuch`; nothing in it needs a notification.
 - Each group section starts with the location and the **mentions of the
   players in it**, so each player is pinged once, in the part about them.
 
-Example:
+Layout of a group section: still open, see variants A–E in the mockup.
+Example (variant A):
 
 ```
 ## ☀️ Tag 12
@@ -981,7 +995,7 @@ auf die morschen Planken setzt … **Mira** hebt die Laterne …
   game) go in **subtext lines** (`-#`) at the end of a section.
 - Characters in camp are not mentioned (§14).
 
-### Confirmation reactions
+### Confirmation reactions ✅
 
 At the start of a turn the bot adds a ✅ reaction to every message it counted
 as part of an action. Players can see which of their messages were read,
@@ -989,8 +1003,8 @@ without any extra posts. Messages starting with `//` get no reaction.
 
 ### Character sheet
 
-One embed per player in `#weltbuch` (embeds are fine here, no pings
-needed). The side colour shows the starting element.
+One embed per player in the 📖 Weltbuch thread (embeds are fine here, no
+pings needed). Layout still open: see variants 1–4 in the mockup. The side colour shows the starting element.
 
 ```
 Brakka · Kriegerin · 🔥 Feuer · Stufe 4 (340 / 400 EP)
@@ -1008,7 +1022,7 @@ Status lines like *Im Lager* or *Kampfunfähig* are added when they apply.
 
 ### Quest log
 
-One embed in `#weltbuch`:
+One embed in the 📖 Weltbuch thread:
 
 - the premise in one sentence;
 - the seal: shards collected (🔥 ✅ · 💧 ✅ · 🪨 ⬜ …), x of y needed;

@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Everwild Discord Mockups</title>
+<style>
+  :root {
+    --page: #1e1f22;
+    --chat: #313338;
+    --text: #dbdee1;
+    --muted: #949ba4;
+    --heading: #f2f3f5;
+    --embed: #2b2d31;
+    --quote: #4e5058;
+    --mention-bg: rgba(88, 101, 242, 0.3);
+    --mention-text: #c9cdfb;
+    --blurple: #5865f2;
+    --bot-name: #e0b354;
+    --player-a: #f0745b;
+    --player-b: #f2d675;
+    --fire: #e8613c;
+    --water: #3c8ee8;
+    --light: #f2d675;
+    --shadow: #8a5cd6;
+    --swamp: #4a6fa5;
+    --note: #c4c9d0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text);
+    font: 16px/1.375 "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .page { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
+  .page > h1 { color: var(--heading); font-size: 28px; margin: 0 0 8px; }
+  .page > p.lead { color: var(--note); margin: 0 0 16px; max-width: 70ch; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 32px; }
+  .toolbar button {
+    background: var(--embed); color: var(--text); border: 1px solid var(--quote);
+    border-radius: 4px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer;
+  }
+  .toolbar button[aria-pressed="true"] { background: var(--blurple); border-color: var(--blurple); color: #fff; }
+
+  section.group { margin: 0 0 48px; }
+  section.group > h2 { color: var(--heading); font-size: 22px; margin: 0 0 4px; }
+  section.group > p { color: var(--note); margin: 0 0 20px; max-width: 70ch; }
+
+  .variant { margin: 0 0 28px; }
+  .variant-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 8px; }
+  .variant-head .tag {
+    background: var(--blurple); color: #fff; font-weight: 700; font-size: 13px;
+    border-radius: 4px; padding: 1px 8px;
+  }
+  .variant-head h3 { color: var(--heading); font-size: 17px; margin: 0; }
+  .variant-head .why { color: var(--note); font-size: 14px; flex-basis: 100%; }
+
+  /* Discord-like chat frame */
+  .frame {
+    background: var(--chat); border-radius: 8px; padding: 16px 0;
+    max-width: 100%; overflow: hidden; transition: max-width .2s;
+  }
+  body.phone .frame { max-width: 390px; }
+  .msg { display: flex; gap: 16px; padding: 2px 16px 2px 16px; }
+  .msg + .msg { margin-top: 14px; }
+  .msg.cont { margin-top: 2px; }
+  .msg.cont .avatar { visibility: hidden; height: 0; }
+  .avatar {
+    flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 20px;
+    background: linear-gradient(135deg, #2f6b4f, #1a3b5c);
+  }
+  .avatar.p1 { background: linear-gradient(135deg, #a8452f, #5c1f14); }
+  .body { min-width: 0; flex: 1; }
+  .meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .name { font-weight: 600; color: var(--bot-name); }
+  .name.p1 { color: var(--player-a); }
+  .app {
+    background: var(--blurple); color: #fff; font-size: 10px; font-weight: 700;
+    border-radius: 3px; padding: 1px 4px; line-height: 15px;
+  }
+  .time { color: var(--muted); font-size: 12px; }
+  .content { overflow-wrap: anywhere; }
+  .content p { margin: 0 0 8px; }
+  .content p:last-child { margin-bottom: 0; }
+  .content .h2 { color: var(--heading); font-size: 20px; font-weight: 700; margin: 4px 0 8px; }
+  .content .h3 { color: var(--heading); font-size: 16px; font-weight: 700; margin: 2px 0 6px; }
+  .sub { color: var(--muted); font-size: 13px; line-height: 1.35; margin: 2px 0; }
+  .mention {
+    background: var(--mention-bg); color: var(--mention-text);
+    border-radius: 3px; padding: 0 2px; font-weight: 500; white-space: nowrap;
+  }
+  .quote { border-left: 4px solid var(--quote); padding: 0 0 0 12px; margin: 8px 0; }
+  .spoiler {
+    background: #1e1f22; color: transparent; border-radius: 3px; padding: 0 2px;
+    cursor: pointer; transition: color .15s, background .15s;
+  }
+  .spoiler.open { background: rgba(255,255,255,.08); color: inherit; }
+  code {
+    font-family: "Consolas", "Andale Mono", monospace; font-size: 85%;
+    background: var(--embed); border-radius: 3px; padding: 0 3px;
+  }
+  pre {
+    font-family: "Consolas", "Andale Mono", monospace; font-size: 13.5px; line-height: 1.45;
+    background: var(--embed); border: 1px solid #1e1f22; border-radius: 4px;
+    padding: 8px 10px; margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .reactions { display: flex; gap: 4px; margin-top: 4px; }
+  .reaction {
+    background: rgba(88,101,242,.15); border: 1px solid var(--blurple); border-radius: 8px;
+    font-size: 14px; padding: 0 6px; line-height: 22px; color: var(--mention-text);
+  }
+
+  /* embeds */
+  .embed {
+    background: var(--embed); border-left: 4px solid var(--swamp); border-radius: 4px;
+    padding: 8px 16px 14px 12px; margin-top: 6px; max-width: 520px; font-size: 14px;
+  }
+  .embed.fire { border-left-color: var(--fire); }
+  .embed.light { border-left-color: var(--light); }
+  .embed.water { border-left-color: var(--water); }
+  .embed.shadow { border-left-color: var(--shadow); }
+  .embed-author { font-size: 13px; color: var(--muted); margin: 4px 0 2px; }
+  .embed-title { color: var(--heading); font-weight: 700; font-size: 16px; margin: 4px 0 6px; }
+  .embed-desc p { margin: 0 0 4px; }
+  .fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; margin-top: 8px; }
+  .field.wide { grid-column: 1 / -1; }
+  .field-name { color: var(--heading); font-weight: 700; margin-bottom: 2px; }
+  body.phone .fields { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  .embed-footer { color: var(--muted); font-size: 12px; margin-top: 10px; }
+  .bar { letter-spacing: -1px; }
+
+  /* thread chip */
+  .thread {
+    display: inline-flex; flex-direction: column; gap: 2px; margin-top: 6px;
+    background: var(--embed); border-radius: 8px; padding: 8px 12px; max-width: 420px;
+  }
+  .thread b { color: var(--heading); }
+  .thread span { color: var(--muted); font-size: 13px; }
+  .pinned { color: var(--muted); font-size: 13px; padding: 0 16px 4px 72px; }
+
+  .divider { border: 0; border-top: 1px solid #3f4147; margin: 14px 16px; }
+  .daydivider {
+    display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px;
+    font-weight: 600; margin: 4px 16px 12px;
+  }
+  .daydivider::before, .daydivider::after { content: ""; flex: 1; border-top: 1px solid #3f4147; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Everwild: Discord mockups</h1>
+  <p class="lead">An approximation of Discord's dark theme, to compare layouts. The
+  story, dice and rewards are the same in every variant: Brakka (Kriegerin, 🔥)
+  and Mira (Klerikerin, ☀️) fight two Moorschleicher in the Nebelsümpfe.
+  Click on black spoiler bars to reveal them.</p>
+  <div class="toolbar" role="group" aria-label="Breite">
+    <button type="button" data-width="desktop" aria-pressed="true">Desktop</button>
+    <button type="button" data-width="phone" aria-pressed="false">Phone width</button>
+  </div>
+
+  <!-- ============================================================ -->
+  <section class="group">
+    <h2>0 · One channel with a thread</h2>
+    <p>Everything happens in <code>#abenteuer</code>. The reference messages (quest log,
+    character sheets) live in a locked thread, <b>📖 Weltbuch</b>, attached to the pinned
+    <i>So spielst du mit</i> message. The channel topic shows the day and the seal.</p>
+    <div class="frame">
+      <div class="sub" style="padding:0 16px 10px">#abenteuer · <i>Tag 12 · nächste Runde ca. 20 Uhr · Siegel: 2 / 4 Splitter</i></div>
+      <div class="pinned">📌 Angepinnt</div>
+      <div class="msg">
+        <div class="avatar" aria-hidden="true">🌿</div>
+        <div class="body">
+          <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">03.10.2026</span></div>
+          <div class="content">
+            <p class="h3">So spielst du mit</p>
+            <p>Schreib einfach, was deine Figur tun will. Einmal am Abend erzählt der Chronist, wie es weitergeht …</p>
+          </div>
+          <div class="thread"><b>📖 Weltbuch</b><span>14 Nachrichten · Questlog und Charakterbögen · zuletzt aktualisiert heute um 20:04</span></div>
+        </div>
+      </div>
+      <div class="daydivider">14. Oktober 2026</div>
+      <div class="msg">
+        <div class="avatar p1" aria-hidden="true">🪓</div>
+        <div class="body">
+          <div class="meta"><span class="name p1">Brakka</span><span class="time">Heute um 09:12</span></div>
+          <div class="content"><p>Ich gehe über den Steg zur Bronzefigur und greife an, was sich mir in den Weg stellt.</p></div>
+          <div class="reactions"><span class="reaction">✅ 1</span></div>
+        </div>
+      </div>
+      <div class="msg">
+        <div class="avatar" aria-hidden="true">🌿</div>
+        <div class="body">
+          <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04</span></div>
+          <div class="content"><p class="h2">☀️ Tag 12</p><p class="sub">The chapter follows, see variants A–E below.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="group">
+    <h2>Group section: variants</h2>
+    <p>One group's part of the daily chapter. Mentions in message text send notifications;
+    mentions inside embeds don't.</p>
+
+    <!-- A -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">A</span><h3>Header, mention line, subtext</h3>
+        <span class="why">The current proposal. Clear and compact, but the grey lines get long in bigger groups.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04</span></div>
+            <div class="content">
+              <p class="h3">📍 Nebelsümpfe – Der versunkene Steg</p>
+              <p><span class="mention">@Brakka</span> <span class="mention">@Mira</span></p>
+              <p>Nebel kriecht über das schwarze Wasser, als <b>Brakka</b> den ersten Schritt auf die morschen Planken des versunkenen Stegs setzt. Das Holz ächzt, doch es hält. Dort, wo die Bronzefigur eines vergessenen Fährmanns aus dem Morast ragt, regt sich etwas: zwei Moorschleicher, bleich und lautlos, gleiten aus dem Schilf.</p>
+              <p>Brakka zögert nicht. Ihr Schwert fährt in einem glühenden Bogen herab, und der erste Schleicher zerfällt zu nassem Schlamm. Der zweite schnappt nach ihrer Schulter; Blut mischt sich mit dem Moorwasser.</p>
+              <p><b>Mira</b> hebt die Laterne und spricht die alten Worte des Lichts. Der Schein brennt sich durch den Nebel, und der zweite Schleicher flieht kreischend ins Schilf. Am Fuß der Bronzefigur glänzt etwas Kaltes im Schlamm: eine Klinge, von Raureif überzogen.</p>
+              <p class="sub">🎲 Brakka: 14 + 3 = 17 gegen 12 → Erfolg · ⚔️ 9 Schaden · ❤️ −4 (27 / 34)</p>
+              <p class="sub">🎲 Mira: 15 + 2 = 17 gegen 12 → Erfolg</p>
+              <p class="sub">✨ +20 EP (Brakka, Mira) · 🎒 Frostklinge (Mira)</p>
+              <p class="sub">⬆️ Mira erreicht Stufe 5! Wähle eine Fähigkeit: Gruppenheilung, Schutzsegen oder Bannkreis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">B</span><h3>Mentions inside the story</h3>
+        <span class="why">No separate mention line: each name is a mention the first time it appears. Reads more like a book. Discord shows the server nickname in the pill.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04</span></div>
+            <div class="content">
+              <p class="h3">📍 Nebelsümpfe – Der versunkene Steg</p>
+              <p>Nebel kriecht über das schwarze Wasser, als <span class="mention">@Brakka</span> den ersten Schritt auf die morschen Planken des versunkenen Stegs setzt. Das Holz ächzt, doch es hält. Dort, wo die Bronzefigur eines vergessenen Fährmanns aus dem Morast ragt, regt sich etwas: zwei Moorschleicher, bleich und lautlos, gleiten aus dem Schilf.</p>
+              <p>Brakka zögert nicht. Ihr Schwert fährt in einem glühenden Bogen herab, und der erste Schleicher zerfällt zu nassem Schlamm. Der zweite schnappt nach ihrer Schulter; Blut mischt sich mit dem Moorwasser.</p>
+              <p><span class="mention">@Mira</span> hebt die Laterne und spricht die alten Worte des Lichts. Der Schein brennt sich durch den Nebel, und der zweite Schleicher flieht kreischend ins Schilf. Am Fuß der Bronzefigur glänzt etwas Kaltes im Schlamm: eine Klinge, von Raureif überzogen.</p>
+              <p class="sub">🎲 Brakka 17 / 12 ✔ · ⚔️ 9 · ❤️ 27 / 34 — 🎲 Mira 17 / 12 ✔</p>
+              <p class="sub">✨ +20 EP für beide · 🎒 Frostklinge → Mira · ⬆️ Mira: Stufe 5 (Gruppenheilung / Schutzsegen / Bannkreis?)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">C</span><h3>Story plus result box</h3>
+        <span class="why">The story stays clean; numbers go into an embed coloured by the region's element. The box is easy to skip or to look up.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04</span></div>
+            <div class="content">
+              <p class="h3">📍 Nebelsümpfe – Der versunkene Steg</p>
+              <p><span class="mention">@Brakka</span> <span class="mention">@Mira</span></p>
+              <p>Nebel kriecht über das schwarze Wasser, als <b>Brakka</b> den ersten Schritt auf die morschen Planken des versunkenen Stegs setzt. Das Holz ächzt, doch es hält. Dort, wo die Bronzefigur eines vergessenen Fährmanns aus dem Morast ragt, regt sich etwas: zwei Moorschleicher, bleich und lautlos, gleiten aus dem Schilf.</p>
+              <p>Brakka zögert nicht. Ihr Schwert fährt in einem glühenden Bogen herab, und der erste Schleicher zerfällt zu nassem Schlamm. Der zweite schnappt nach ihrer Schulter; Blut mischt sich mit dem Moorwasser.</p>
+              <p><b>Mira</b> hebt die Laterne und spricht die alten Worte des Lichts. Der Schein brennt sich durch den Nebel, und der zweite Schleicher flieht kreischend ins Schilf. Am Fuß der Bronzefigur glänzt etwas Kaltes im Schlamm: eine Klinge, von Raureif überzogen.</p>
+            </div>
+            <div class="embed">
+              <div class="embed-title">Ergebnis</div>
+              <div class="fields">
+                <div class="field"><div class="field-name">Brakka</div>🎲 17 gegen 12 ✔<br>⚔️ 9 Schaden<br>❤️ 27 / 34</div>
+                <div class="field"><div class="field-name">Mira</div>🎲 17 gegen 12 ✔<br>❤️ 22 / 22</div>
+                <div class="field"><div class="field-name">Beute</div>🎒 Frostklinge → Mira<br>✨ +20 EP für beide</div>
+                <div class="field wide"><div class="field-name">⬆️ Mira erreicht Stufe 5</div>Wähle eine Fähigkeit: Gruppenheilung, Schutzsegen oder Bannkreis.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">D</span><h3>One paragraph per player</h3>
+        <span class="why">A short scene opener, then each player's part as a quote block with their own numbers. Everyone finds their part instantly; the story is a bit less flowing.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04</span></div>
+            <div class="content">
+              <p class="h3">📍 Nebelsümpfe – Der versunkene Steg</p>
+              <p>Nebel kriecht über das schwarze Wasser. Dort, wo die Bronzefigur eines vergessenen Fährmanns aus dem Morast ragt, gleiten zwei Moorschleicher aus dem Schilf, bleich und lautlos.</p>
+              <div class="quote">
+                <p><span class="mention">@Brakka</span> ⚔️🔥</p>
+                <p>Die morschen Planken ächzen unter ihren Stiefeln, doch Brakka zögert nicht. Ihr Schwert fährt in einem glühenden Bogen herab, und der erste Schleicher zerfällt zu nassem Schlamm. Der zweite schnappt nach ihrer Schulter.</p>
+                <p class="sub">🎲 14 + 3 = 17 gegen 12 → Erfolg · ⚔️ 9 Schaden · ❤️ −4 (27 / 34) · ✨ +20 EP</p>
+              </div>
+              <div class="quote">
+                <p><span class="mention">@Mira</span> ✨☀️</p>
+                <p>Mira hebt die Laterne und spricht die alten Worte des Lichts. Der Schein brennt sich durch den Nebel, und der zweite Schleicher flieht kreischend ins Schilf. Im Schlamm findet sie eine Klinge, von Raureif überzogen.</p>
+                <p class="sub">🎲 15 + 2 = 17 gegen 12 → Erfolg · 🎒 Frostklinge · ✨ +20 EP</p>
+                <p class="sub">⬆️ Stufe 5! Wähle eine Fähigkeit: Gruppenheilung, Schutzsegen oder Bannkreis.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">E</span><h3>Numbers in spoilers</h3>
+        <span class="why">Like A, but dice results are hidden until clicked. Good for suspense; rewards and level-ups stay visible.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04</span></div>
+            <div class="content">
+              <p class="h3">📍 Nebelsümpfe – Der versunkene Steg</p>
+              <p><span class="mention">@Brakka</span> <span class="mention">@Mira</span></p>
+              <p>Nebel kriecht über das schwarze Wasser, als <b>Brakka</b> den ersten Schritt auf die morschen Planken des versunkenen Stegs setzt. Das Holz ächzt, doch es hält. Dort, wo die Bronzefigur eines vergessenen Fährmanns aus dem Morast ragt, regt sich etwas: zwei Moorschleicher, bleich und lautlos, gleiten aus dem Schilf.</p>
+              <p>Brakka zögert nicht. Ihr Schwert fährt in einem glühenden Bogen herab, und der erste Schleicher zerfällt zu nassem Schlamm. Der zweite schnappt nach ihrer Schulter; Blut mischt sich mit dem Moorwasser.</p>
+              <p><b>Mira</b> hebt die Laterne und spricht die alten Worte des Lichts. Der Schein brennt sich durch den Nebel, und der zweite Schleicher flieht kreischend ins Schilf. Am Fuß der Bronzefigur glänzt etwas Kaltes im Schlamm: eine Klinge, von Raureif überzogen.</p>
+              <p class="sub">🎲 <span class="spoiler" tabindex="0">Brakka: 14 + 3 = 17 gegen 12 → Erfolg · ⚔️ 9 Schaden · ❤️ 27 / 34</span></p>
+              <p class="sub">🎲 <span class="spoiler" tabindex="0">Mira: 15 + 2 = 17 gegen 12 → Erfolg</span></p>
+              <p class="sub">✨ +20 EP (Brakka, Mira) · 🎒 Frostklinge (Mira)</p>
+              <p class="sub">⬆️ Mira erreicht Stufe 5! Wähle eine Fähigkeit: Gruppenheilung, Schutzsegen oder Bannkreis.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section class="group">
+    <h2>Character sheet: variants</h2>
+    <p>Edited in place in the 📖 Weltbuch thread every turn. The side colour is the character's element.</p>
+
+    <!-- 1 -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">1</span><h3>Description lines</h3>
+        <span class="why">The current proposal. Everything as short lines with emoji labels; compact and phone-friendly.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04 (bearbeitet)</span></div>
+            <div class="embed fire">
+              <div class="embed-title">Brakka · Kriegerin · 🔥 Feuer · Stufe 4</div>
+              <div class="embed-desc">
+                <p>❤️ 27 / 34 LP · 🛡️ Rüstungswert 13 · 💰 57 Gold · ✨ 340 / 400 EP</p>
+                <p>STÄ +4 · GES +1 · VER 0</p>
+                <p>Affinität: 🔥 2 · 🪨 1</p>
+                <p>Fähigkeiten: Wuchtschlag (bereit)</p>
+                <p>📍 Nebelsümpfe – Der versunkene Steg (mit Mira)</p>
+                <p>Ausrüstung: Schwert · Schild · Kettenhemd · Talisman der Glut</p>
+                <p>Rucksack (4 / 10): Heiltrank ×3 · Dietriche · Rubin · Brief an Bruder Orm</p>
+                <p>🪦 Grab: Aschefeld – 12 Gold, 2 Gegenstände</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">2</span><h3>Fields grid</h3>
+        <span class="why">Discord embed fields, three per row on desktop (one per row on phones). Looks like a real character sheet; takes more height on phones.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04 (bearbeitet)</span></div>
+            <div class="embed fire">
+              <div class="embed-author">Kriegerin · 🔥 Feuer</div>
+              <div class="embed-title">Brakka · Stufe 4</div>
+              <div class="fields">
+                <div class="field"><div class="field-name">❤️ Leben</div>27 / 34</div>
+                <div class="field"><div class="field-name">🛡️ Rüstung</div>13</div>
+                <div class="field"><div class="field-name">💰 Gold</div>57</div>
+                <div class="field"><div class="field-name">Attribute</div>STÄ +4<br>GES +1<br>VER 0</div>
+                <div class="field"><div class="field-name">Affinität</div>🔥 2<br>🪨 1</div>
+                <div class="field"><div class="field-name">Fähigkeiten</div>Wuchtschlag ✔</div>
+                <div class="field wide"><div class="field-name">Ausrüstung</div>Schwert · Schild · Kettenhemd · Talisman der Glut</div>
+                <div class="field wide"><div class="field-name">Rucksack (4 / 10)</div>Heiltrank ×3 · Dietriche · Rubin · Brief an Bruder Orm</div>
+                <div class="field wide"><div class="field-name">🪦 Grab</div>Aschefeld – 12 Gold, 2 Gegenstände</div>
+              </div>
+              <div class="embed-footer">📍 Nebelsümpfe – Der versunkene Steg · mit Mira · ✨ 340 / 400 EP</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">3</span><h3>Bars</h3>
+        <span class="why">Like 1, but HP and XP as bars, so the state is visible at a glance. Very gamey; bars are built from emoji or block characters.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04 (bearbeitet)</span></div>
+            <div class="embed fire">
+              <div class="embed-title">Brakka · Kriegerin · 🔥 · Stufe 4</div>
+              <div class="embed-desc">
+                <p>❤️ <span class="bar">🟥🟥🟥🟥🟥🟥🟥🟥⬛⬛</span> 27 / 34</p>
+                <p>✨ <span class="bar">🟨🟨🟨🟨🟨🟨🟨🟨⬛⬛</span> 340 / 400</p>
+                <p>🛡️ 13 · 💰 57 · STÄ +4 · GES +1 · VER 0 · 🔥 2 · 🪨 1</p>
+                <p>⚔️ Wuchtschlag: bereit</p>
+                <p>🎒 Schwert · Schild · Kettenhemd · Talisman der Glut</p>
+                <p>👜 4 / 10: Heiltrank ×3 · Dietriche · Rubin · Brief an Bruder Orm</p>
+                <p>📍 Nebelsümpfe – Der versunkene Steg · 🪦 Aschefeld</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="variant">
+      <div class="variant-head"><span class="tag">4</span><h3>Party overview plus details</h3>
+        <span class="why">One message lists every character in two lines (who is where, how they are doing); the full sheets follow as separate messages. The overview is the one people would read every day.</span></div>
+      <div class="frame">
+        <div class="msg">
+          <div class="avatar" aria-hidden="true">🌿</div>
+          <div class="body">
+            <div class="meta"><span class="name">Everwild</span><span class="app">APP</span><span class="time">Heute um 20:04 (bearbeitet)</span></div>
+            <div class="embed">
+              <div class="embed-title">Die Gefährten · Tag 12</div>
+              <div class="embed-desc">
+                <p><b>🔥 Brakka</b> · Kriegerin 4 · ❤️ 27 / 34 · 💰 57<br><span style="color:var(--muted)">📍 Nebelsümpfe – Der versunkene Steg</span></p>
+                <p><b>☀️ Mira</b> · Klerikerin 5 ⬆️ · ❤️ 22 / 22 · 💰 31<br><span style="color:var(--muted)">📍 Nebelsümpfe – Der versunkene Steg</span></p>
+                <p><b>🌑 Fenn</b> · Schurke 3 · ❤️ 9 / 16 · 💰 112<br><span style="color:var(--muted)">📍 Glutmarkt · 🪦 Grab im Aschefeld</span></p>
+                <p><b>🌪️ Sólveig</b> · Magierin 4 · ⛺ Im Lager</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+  document.querySelectorAll('.toolbar button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.toolbar button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      document.body.classList.toggle('phone', btn.dataset.width === 'phone');
+    });
+  });
+  document.querySelectorAll('.spoiler').forEach(function (el) {
+    var open = function () { el.classList.add('open'); };
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') open(); });
+  });
+</script>
+</body>
+</html>
