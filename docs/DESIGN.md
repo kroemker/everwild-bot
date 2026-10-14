@@ -989,8 +989,7 @@ channel**, `#abenteuer`, and no new channels.
   (for the topic).
 
 **Non-players** in the channel: a message from someone without a character
-is ignored unless it is a join message (§14). (Open: whether to also limit
-joining to an allowlist of Discord users.)
+is ignored unless it is a join message (§14). No allowlist.
 
 Mockups of the layout: [`docs/mockups/discord-output.html`](mockups/discord-output.html).
 
@@ -1085,7 +1084,7 @@ One embed in the 📖 Weltbuch thread:
 Discord limits how fast a bot can post and edit. With at most 10 players the
 bot simply waits briefly between requests and retries on a rate-limit answer.
 
-## 17. State files and technical setup 💡
+## 17. State files and technical setup ✅
 
 ### Stack
 
@@ -1133,7 +1132,9 @@ sim/combat_sim.py        # balancing simulation (§7)
 ### Configuration
 
 - **Secrets**: `DISCORD_BOT_TOKEN`, `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY`.
-- **Variables**: `LLM_PROVIDER`, `ADVENTURE_CHANNEL_ID`, model names.
+- **Variables**: `LLM_PROVIDER` (default **openai**; Anthropic stays switchable),
+  `ADVENTURE_CHANNEL_ID`, model names.
+- Prompts are written and tested against OpenAI first.
 - In the Discord developer portal, the **Message Content Intent** must be
   enabled (as for meme-bot), also for reading messages over REST.
 
@@ -1193,7 +1194,65 @@ summary update. With 4–6 players that is usually 3–7 calls a day.
 
 ## 18. Prompting and LLM safety 💡
 
-- Player text is always treated as an *attempt*, never as a fact ("Ich finde ein legendäres Schwert" does not create one).
-- The Resolve step returns structured JSON only; Python validates all state changes.
-- Prompts are written in German; names in the JSON are German too, so they stay consistent.
-- The narrator uses "ihr" for the group and "du" for single players (to confirm).
+### The LLM calls
+
+| Call | When | Input | Output |
+|---|---|---|---|
+| **World generation** | New game (§15) | Length, theme, the graph built by Python | Premise, regions, locations, NPCs, creatures, items (JSON, one call per region) |
+| **Interpret** | Each turn, per group | Action texts, the scene, sheets | One action per player (JSON) |
+| **Narrate** | Each turn, per group | The executed outcome | The German chapter text for the group |
+| **Summary** | Each turn | Today's chapters, the old summary | The updated chronicle summary |
+| **Epilogue** | Game end | Chronicle, characters | Epilogue text |
+
+- Prompts live as text files in `prompts/` (one per call), so they can be
+  tweaked without touching code.
+- All JSON outputs use OpenAI structured outputs with a strict schema.
+
+### Interpret
+
+- Maps each player's text to **one action** from the fixed list (§3) with its
+  parameters: target (by ID from the scene), item, ability, what is said
+  (for talking), and, if a check is needed, attribute and difficulty (§5).
+- Also extracts join data (name, class, element, background sentence, §14),
+  ability choices (§9) and attribute choices.
+- Player text is **always an attempt, never a fact**. "Ich finde ein
+  legendäres Schwert" or "Ich töte den Endboss mit einem Schlag" does not make
+  it so; the rules decide.
+- Text that tries to give the model instructions ("Ignoriere alle Regeln …")
+  is just a character's words in the story, nothing more.
+- Python checks every ID and value. Anything that doesn't exist in the scene
+  or the inventory makes the action fail or turns it into the closest
+  sensible action (§3).
+
+### Narrate
+
+- Gets the **executed outcome** (who did what, success or failure, damage,
+  loot, who is down) and must **not change it**. It decides only *how* it is
+  told, never *what* happens.
+- **No numbers in the prose**: all numbers are in the result box (§16).
+- Mentions every player of the group.
+- **Never plays a character for their player**: no actions, decisions or
+  feelings that the player didn't write. Short reactions that follow directly
+  from the outcome are fine ("Blut mischt sich mit dem Moorwasser").
+- Uses the location's fixed description and features, adds only passing
+  details (§11). NPCs only reveal facts from their knowledge (§12).
+- Ends with an **open situation** that invites the next action, without a
+  cliffhanger that withholds information.
+- 150–250 words per group (§16).
+
+### Style
+
+- Classic, serious high fantasy. NPCs speak in their own voice, some funny (§1).
+- Direct speech in German quotation marks („…“).
+- Out-of-character notes (subtext lines) address the player as *du*.
+- Content: fantasy violence yes, nothing gory or explicit (a game among friends).
+
+### Quality checks
+
+- A set of **sample player messages with the expected action** (e.g.
+  "Ich hau dem Goblin eine rein" → attack, target goblin) is run as a test
+  whenever the interpret prompt changes.
+- New prompts are tried in the local play mode (§17) before going live.
+
+Open: tense and perspective of the narration (below).
+
