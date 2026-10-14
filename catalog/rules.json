@@ -1,0 +1,59 @@
+{
+  "difficulties": {
+    "leicht": 8,
+    "mittel": 12,
+    "schwer": 16,
+    "heroisch": 20
+  },
+  "complication_margin": 2,
+  "ability_cooldown_turns": 3,
+  "second_ability_level": 5,
+  "max_level": 10,
+  "max_attribute": 5,
+  "attribute_increase_levels": [3, 6, 9],
+  "bag_slots": 10,
+  "stack_size": 5,
+  "base_armor_value": 10,
+  "shield_bonus": 1,
+  "combat_rounds_per_turn": 3,
+  "flee_difficulty": "mittel",
+  "potion_heal_fraction": 0.5,
+  "rest_heal_fraction": 0.5,
+  "camp_after_idle_turns": 3,
+  "free_change_turns": 3,
+  "max_players": 10,
+  "starting_gold": 10,
+  "sell_price_fraction": 0.5,
+  "game_lengths": {
+    "kurz": {"label": "Kurz", "target_turns": 30, "xp_per_level": 50, "regions": 3, "shards_needed": 3},
+    "mittel": {"label": "Mittel", "target_turns": 60, "xp_per_level": 100, "regions": 5, "shards_needed": 4},
+    "lang": {"label": "Lang", "target_turns": 100, "xp_per_level": 170, "regions": 8, "shards_needed": 6}
+  },
+  "xp": {
+    "enemy": {"schwach": 5, "normal": 10, "stark": 20, "elite": 40, "boss": 100},
+    "side_quest": 30,
+    "main_quest_step": 60,
+    "new_location": 5,
+    "check": {"schwer": 5, "heroisch": 10},
+    "catch_up_multiplier": 1.5
+  },
+  "rarities": {
+    "gewoehnlich": {"label": "Gewöhnlich", "marker": "", "bonus": 0, "price_multiplier": 1},
+    "selten": {"label": "Selten", "marker": "◆", "bonus": 1, "price_multiplier": 4},
+    "legendaer": {"label": "Legendär", "marker": "★", "bonus": 2, "price_multiplier": 0}
+  },
+  "elements": {
+    "feuer": {"label": "Feuer", "emoji": "🔥", "opposite": "wasser"},
+    "wasser": {"label": "Wasser", "emoji": "💧", "opposite": "feuer"},
+    "erde": {"label": "Erde", "emoji": "🪨", "opposite": "luft"},
+    "luft": {"label": "Luft", "emoji": "🌪️", "opposite": "erde"},
+    "licht": {"label": "Licht", "emoji": "☀️", "opposite": "schatten"},
+    "schatten": {"label": "Schatten", "emoji": "🌑", "opposite": "licht"},
+    "stahl": {"label": "Stahl", "emoji": "⚔️", "opposite": null}
+  },
+  "element_strong_multiplier": 1.5,
+  "element_weak_multiplier": 0.5,
+  "affinity_max": 3,
+  "affinity_resist_from": 2,
+  "max_affinity_elements": 2
+}

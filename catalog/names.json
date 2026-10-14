@@ -1,0 +1,13 @@
+{
+  "common_adjectives": ["rostig", "abgenutzt", "schartig", "verbeult", "alt", "schlicht", "geflickt", "einfach"],
+  "quality_prefixes": ["Meister", "Veteranen", "Hauptmanns", "Zwergen"],
+  "quality_genitives": ["der Meister", "der Wacht", "des Söldners", "der Klingenbrüder", "des Hauptmanns", "der Veteranen"],
+  "elements": {
+    "feuer": {"prefixes": ["Glut", "Flammen"], "adjectives": ["glühend", "lodernd"], "genitives": ["der Flamme", "der Glut"]},
+    "wasser": {"prefixes": ["Frost", "Eis", "Nebel"], "adjectives": ["frostig", "eisig"], "genitives": ["des Frosts", "des Nebels"]},
+    "erde": {"prefixes": ["Stein", "Dorn"], "adjectives": ["steinern", "dornig"], "genitives": ["des Steins", "der Dornen"]},
+    "luft": {"prefixes": ["Sturm", "Donner", "Wind"], "adjectives": ["donnernd", "stürmisch"], "genitives": ["des Sturms", "des Donners"]},
+    "licht": {"prefixes": ["Sonnen", "Licht"], "adjectives": ["geweiht", "strahlend"], "genitives": ["der Sonne", "des Morgens"]},
+    "schatten": {"prefixes": ["Schatten", "Nacht"], "adjectives": ["verflucht", "finster"], "genitives": ["der Nacht", "der Schatten"]}
+  }
+}

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "everwild"
+version = "0.1.0"
+description = "Ein asynchrones Fantasy-Textabenteuer für Discord"
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2.7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

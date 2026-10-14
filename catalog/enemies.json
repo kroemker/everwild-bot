@@ -1,0 +1,11 @@
+{
+  "tiers": {
+    "schwach": {"label": "Schwach", "hp": 4, "defense": 10, "attack": 2, "damage": "1d4"},
+    "normal": {"label": "Normal", "hp": 7, "defense": 11, "attack": 3, "damage": "1d6"},
+    "stark": {"label": "Stark", "hp": 14, "defense": 12, "attack": 4, "damage": "1d8"},
+    "elite": {"label": "Elite", "hp": 14, "defense": 13, "attack": 5, "damage": "1d10", "hp_per_player": true, "extra_attacks_per_player": 0.34},
+    "boss": {"label": "Boss", "hp": 16, "defense": 14, "attack": 4, "damage": "1d10", "hp_per_player": true, "extra_attacks_per_player": 0.34, "hp_per_level": 0.45}
+  },
+  "region_scaling": {"hp_per_level": 0.15, "defense_every_levels": 3, "attack_every_levels": 3, "damage_every_levels": 3},
+  "group_scaling": {"extra_per_player": 0.9}
+}

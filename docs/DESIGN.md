@@ -146,10 +146,10 @@ class can do a bit of everything and is especially good at one thing.
 |---|---|---|---|---|
 | **Krieger** | +3 / +1 / 0 | 14 | *Wuchtschlag*: one attack that hits for sure and does double damage | +1 armour, can use heavy weapons and armour |
 | **Waldläufer** | +1 / +3 / 0 | 11 | *Gezielter Schuss*: a ranged attack before the fight starts | Tracking and finding hidden paths, bonus when travelling |
-| **Magier** | 0 / +1 / +3 | 8 | *Feuerball*: damage to all enemies, ignores armour | Can read runes, magic scrolls and arcane objects |
-| **Kleriker** | +1 / 0 / +2 | 12 | *Heilung*: heals self or an ally at the same location | When the group rests, everyone recovers extra HP |
+| **Magier** | 0 / +1 / +3 | 12 | *Feuerball*: damage to all enemies, ignores armour | +1 Rüstungswert (arcane protection); can read runes, magic scrolls and arcane objects |
+| **Kleriker** | +1 / 0 / +3 | 12 | *Heilung*: heals self or an ally at the same location | Melee attacks use VER (faith guides the weapon); when the group rests, everyone recovers extra HP |
 | **Schurke** | 0 / +3 / +1 | 10 | *Schattenschritt*: sneaking, stealing or a stab from behind succeeds automatically | Opens locks and spots traps |
-| **Barde** | 0 / +1 / +2 | 10 | *Betören*: one conversation with an NPC succeeds automatically (convince, bluff, get a discount) | Knows legends; the narrator gives extra hints about the world |
+| **Barde** | 0 / +2 / +3 | 11 | *Betören*: one conversation with an NPC succeeds automatically (convince, bluff, get a discount) | Melee attacks use VER (wit and blade); knows legends, the narrator gives extra hints about the world |
 
 - Players choose the word form of their class name (e.g. *Waldläuferin*, *Klerikerin*).
 - The same class may be taken by several players.
@@ -311,7 +311,9 @@ Idle players in a fight automatically **defend** themselves.
 ### Attacks and damage
 
 - **Player attack**: d20 + attribute against the enemy's *Abwehr*. Melee uses
-  STÄ, ranged GES, spells VER.
+  STÄ (light weapons: STÄ or GES; Kleriker and Barde: VER), ranged GES,
+  spells VER. Rarity bonus and element affinity add to the roll.
+- **Critical hit** (natural 20): damage dice are rolled twice. A natural 1 always misses.
 - **Damage**: weapon die + attribute. Draft dice: Dolch d4, Bogen d6,
   Schwert d8, Streitaxt d10 (two-handed).
 - **Magier basic spell**: *Arkaner Blitz*, d6 + VER in the character's element.
@@ -319,26 +321,79 @@ Idle players in a fight automatically **defend** themselves.
 - **Elements** (§6): opposite element → advantage and +50 % damage; same
   element → half damage.
 - **Enemy attack**: d20 + enemy attack bonus against the player's
-  *Rüstungswert* = 10 + armour (+1 for Krieger).
-- Enemies pick a random target in the group.
+  *Rüstungswert* = 10 + armour + shield + class bonus (Krieger, Magier +1).
+  Damage of an element the player resists (affinity ≥ 2) is halved.
+- Enemies pick a random standing target in the group.
+- Players act first in each round, then the enemies.
+
+### Ability numbers
+
+| Ability | Effect in a fight |
+|---|---|
+| Wuchtschlag, Schattenschritt | Round 1: sure hit, double damage |
+| Gezielter Schuss | Before round 1: attack with advantage, double damage |
+| Feuerball | Round 1: d6 + VER to every enemy, sure hit, in the Magier's element |
+| Heilung | Round 1: heals 2d6 + VER, wakes a down character |
+| Gruppenheilung | Round 1: everyone heals half their max HP, down characters wake |
+| Pfeilhagel | Round 1: one attack against every enemy |
+| Wirbelwind | Every round: one attack against every enemy |
+| Hinterhalt | Before round 1: every player attacks once |
+| Schlachtruf, Heldenlied | All players have advantage on attacks this fight |
+| Spottlied | Enemies have disadvantage on attacks this fight |
+| Elementarbarriere | The group takes half damage this fight |
+| Unerschütterlich | Krieger can't drop below 1 HP; all enemies attack him |
+| Schutzsegen | One ally can't drop below 1 HP |
+| Bannkreis | Weak and normal enemies flee before round 1 |
+| Rauchbombe | The whole group escapes before round 1 |
+| Heiltrank | Heals half max HP (also on an ally) |
+| Schriftrolle | 2d6 to every enemy in the scroll's element (Magier only) |
 
 ### Enemy stats
 
 Enemies don't get freely invented numbers. The world file gives each enemy a
-**tier**; Python looks up the stats and scales them by region level.
+**tier** and a count (for one player); Python looks up the stats and scales
+them. Tuned with the simulation (below).
 
 | Tier | Example | HP | Abwehr | Attack | Damage |
 |---|---|---|---|---|---|
 | Schwach | Ratte, Goblin | 4 | 10 | +2 | d4 |
-| Normal | Wolf, Bandit | 8 | 12 | +3 | d6 |
-| Stark | Oger | 16 | 13 | +4 | d8 |
-| Elite | Hauptmann der Wache | 24 | 14 | +5 | d10 |
-| Boss | Region boss | 40 per player | 15 | +6 | 2d6 |
+| Normal | Wolf, Bandit | 7 | 11 | +3 | d6 |
+| Stark | Oger | 14 | 12 | +4 | d8 |
+| Elite | Hauptmann der Wache | 14 per player | 13 | +5 | d10 |
+| Boss | Region boss | 16 per player | 14 | +4 | d10 |
 
-- **Scaling with group size**: the number of enemies (and boss HP) scales
-  with the number of players present, so a solo player and a group of six
-  both get a fair fight.
+- **Region level**: +15 % HP per level above 1 (bosses +45 %), and +1 Abwehr,
+  +1 attack and +1 damage every 3 levels.
+- **Group size**: normal enemies are multiplied (count × (1 + 0.9 × (players − 1))).
+  **Elites and bosses stay single** but get HP per player and extra attacks
+  (one more attack per round for about every 3 extra players).
 - Enemy health is shown in words, not numbers ("Der Oger taumelt, schwer verwundet").
+
+### Encounter types for world generation
+
+| Type | Enemies (for one player) | Meant for |
+|---|---|---|
+| Leicht | 2 Schwach | Anyone |
+| Standard | 1 Normal + 1 Schwach | Anyone, also alone |
+| Hart | 1 Stark + 1 Normal | Groups; dangerous alone |
+| Elite | 1 Elite + 1 Normal | Groups of 3+ |
+| Boss | 1 Boss | Groups; the narrator warns solo players |
+
+### Simulation results
+
+`sim/combat_sim.py` plays random parties (with simple tactics, one potion
+each, no rests between turns) against each encounter type at the same
+region level. Win rates with the tuned numbers (500 fights per cell):
+
+| Encounter | 1 player | 2 players | 4 players | 6 players |
+|---|---|---|---|---|
+| Standard | 83–98 % | 94–100 % | 99–100 % | 100 % |
+| Hart | 41–58 % | 51–83 % | 68–99 % | 97–100 % |
+| Elite (level 3+) | 38–40 % | 84–92 % | 89–100 % | 99–100 % |
+| Boss (level 3+) | 25–46 % | 72–84 % | 87–96 % | 96–100 % |
+
+A boss fight takes 2–3 turns. Level 5 is a noticeable jump (second abilities).
+The Magier is the most fragile class alone at high levels (+1 HP per level).
 
 ### 0 HP: down, not dead
 
