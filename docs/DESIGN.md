@@ -1006,26 +1006,36 @@ At the start of a turn the bot adds a ✅ reaction to every message it counted
 as part of an action. Players can see which of their messages were read,
 without any extra posts. Messages starting with `//` get no reaction.
 
-### Character sheet
+### Character sheet ✅
 
 One embed per player in the 📖 Weltbuch thread (embeds are fine here, no
-pings needed). Layout still open: variants 1–6 in the mockup;
-favourites are the fields grid (2) combined with HP / XP bars (3), see 5 and 6.
-The sheets are **public** in the thread, not sent as DMs. The side colour shows the starting element.
+pings needed). It is **public**, not sent as a DM. Layout: **variant 5** in
+the mockup.
+
+- Side colour: the character's starting element.
+- Author line: class and element. Title: name and level.
+- Two full-width **bars** (10 segments each): ❤️ HP and ✨ XP toward the next level.
+- Fields grid:
+  - row 1: 🛡️ Rüstungswert (10 + armour + shield + class bonus, §7), 💰 Gold;
+  - row 2: Attribute, Affinität, Fähigkeiten (with cooldown: ✔ or ⏳ n Tage);
+  - full width: Ausrüstung, Rucksack (x / 10), 🪦 Grab (only when there is one).
+- Footer: 📍 location and who else is there (can get long, so it goes last).
+- Status like *Im Lager* or *Kampfunfähig* is added to the title when it applies.
+
+Example (text form):
 
 ```
-Brakka · Kriegerin · 🔥 Feuer · Stufe 4 (340 / 400 EP)
-❤️ 31 / 34 LP · 🛡️ Rüstungswert 13 · 💰 57 Gold
-STÄ +4 · GES +1 · VER 0
-Affinität: 🔥 2 · 🪨 1
-Fähigkeiten: Wuchtschlag (bereit) · Schlachtruf (bereit in 2 Tagen)
-📍 Nebelsümpfe – Der versunkene Steg (mit Mira)
-Ausrüstung: Frostklinge (Schwert, selten, 💧) · Kettenhemd · Talisman der Glut
+Kriegerin · 🔥 Feuer
+Brakka · Stufe 5
+❤️ 🟥🟥🟥🟥🟥🟥🟥🟥⬛⬛ 27 / 34 LP
+✨ 🟨🟨🟨🟨⬛⬛⬛⬛⬛⬛ 440 / 500 EP
+🛡️ Rüstungswert 14 | 💰 Gold 57
+Attribute: STÄ +4 · GES +1 · VER 0 | Affinität: 🔥 2 · 🪨 1 | Fähigkeiten: Wuchtschlag ✔ · Schlachtruf ⏳ 2 Tage
+Ausrüstung: Schwert · Schild · Kettenhemd · Talisman der Glut
 Rucksack (4 / 10): Heiltrank ×3 · Dietriche · Rubin · Brief an Bruder Orm
 🪦 Grab: Aschefeld – 12 Gold, 2 Gegenstände
+📍 Nebelsümpfe – Der versunkene Steg · mit Mira
 ```
-
-Status lines like *Im Lager* or *Kampfunfähig* are added when they apply.
 
 ### Quest log
 
