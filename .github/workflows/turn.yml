@@ -1,0 +1,53 @@
+name: Tagesrunde
+
+on:
+  schedule:
+    # 18:04 UTC = 20:04 German summer time, 19:04 in winter (§3); not on the
+    # full hour, because GitHub delays those runs the most
+    - cron: "4 18 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Probelauf: nichts posten, nichts speichern"
+        type: boolean
+        default: false
+
+concurrency:
+  group: everwild
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  turn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Git identity
+        run: |
+          git config user.name "everwild-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Tagesrunde
+        if: hashFiles('game/state.json') != ''
+        env:
+          PYTHONPATH: src
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          ADVENTURE_CHANNEL_ID: ${{ vars.ADVENTURE_CHANNEL_ID }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            python -m everwild turn --dry-run
+          else
+            python -m everwild turn
+          fi

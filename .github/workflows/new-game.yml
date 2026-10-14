@@ -1,0 +1,57 @@
+name: Neues Spiel
+
+on:
+  workflow_dispatch:
+    inputs:
+      length:
+        description: "Spiellänge"
+        type: choice
+        options: [kurz, mittel, lang]
+        default: mittel
+      theme:
+        description: "Thema (optional), z. B. „eine Inselwelt“"
+        type: string
+        default: ""
+      archive:
+        description: "Altes Spiel archivieren (nötig, wenn noch eines läuft)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: everwild
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  new-game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Git identity
+        run: |
+          git config user.name "everwild-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Neues Spiel
+        env:
+          PYTHONPATH: src
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          ADVENTURE_CHANNEL_ID: ${{ vars.ADVENTURE_CHANNEL_ID }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL }}
+          LENGTH: ${{ inputs.length }}
+          THEME: ${{ inputs.theme }}
+          ARCHIVE: ${{ inputs.archive }}
+        run: |
+          args=(--length "$LENGTH" --theme "$THEME")
+          if [ "$ARCHIVE" = "true" ]; then args+=(--archive); fi
+          python -m everwild new-game "${args[@]}"

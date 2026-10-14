@@ -19,6 +19,15 @@ from .models import Character
 from .world import World
 
 
+class DiscordIds(BaseModel):
+    """Messages the bot edits in place (design §16)."""
+
+    howto: str | None = None
+    thread: str | None = None
+    quest_log: str | None = None
+    sheets: dict[str, str] = Field(default_factory=dict)
+
+
 class GameState(BaseModel):
     game_id: str
     length: str = "mittel"
@@ -27,6 +36,8 @@ class GameState(BaseModel):
     finished: bool = False
     summary: str = ""
     last_message_id: str | None = None
+    posted_turn: int = 0  # the chapter of this turn has been posted (safe re-runs, §3)
+    discord: DiscordIds = Field(default_factory=DiscordIds)
     world: World
     players: dict[str, Character] = Field(default_factory=dict)
 

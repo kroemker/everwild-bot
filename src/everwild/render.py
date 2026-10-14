@@ -18,41 +18,47 @@ def _bar(current: int, maximum: int, full: str, empty: str = "⬛", segments: in
     return full * filled + empty * (segments - filled)
 
 
+def player_result_parts(catalog: Catalog, state: GameState, group: GroupReport, pid: str) -> list[str]:
+    """The numbers of one player in the result box (design §16)."""
+    player = state.players[pid]
+    rep = group.per_player.get(pid)
+    parts: list[str] = []
+    if rep:
+        parts += [f"🎲 {r}" for r in rep.rolls]
+        if rep.attacks:
+            parts.append(f"⚔️ {rep.hits}/{rep.attacks} Treffer, {rep.damage} Schaden")
+        if rep.healed:
+            parts.append(f"💚 +{rep.healed} LP")
+    parts.append(f"❤️ {player.hp} / {ch.max_hp(catalog, player)}")
+    if rep:
+        if rep.xp:
+            parts.append(f"✨ +{rep.xp} EP")
+        if rep.gold:
+            parts.append(f"💰 {rep.gold:+d}")
+        if rep.items:
+            parts.append("🎒 " + ", ".join(rep.items))
+        parts += [f"⬆️ {u}" if not u.startswith(("🪦", "Affinität")) else u for u in rep.level_ups]
+    return parts
+
+
 def result_lines(catalog: Catalog, state: GameState, group: GroupReport) -> list[str]:
-    lines = []
-    for pid in group.players:
-        player = state.players.get(pid)
-        rep = group.per_player.get(pid)
-        if player is None:
-            continue
-        parts: list[str] = []
-        if rep:
-            parts += [f"🎲 {r}" for r in rep.rolls]
-            if rep.attacks:
-                parts.append(f"⚔️ {rep.hits}/{rep.attacks} Treffer, {rep.damage} Schaden")
-            if rep.healed:
-                parts.append(f"💚 +{rep.healed} LP")
-        parts.append(f"❤️ {player.hp} / {ch.max_hp(catalog, player)}")
-        if rep:
-            if rep.xp:
-                parts.append(f"✨ +{rep.xp} EP")
-            if rep.gold:
-                parts.append(f"💰 {rep.gold:+d}")
-            if rep.items:
-                parts.append("🎒 " + ", ".join(rep.items))
-            parts += [f"⬆️ {u}" if not u.startswith(("🪦", "Affinität")) else u for u in rep.level_ups]
-        lines.append(f"**{player.name}**: " + " · ".join(parts))
+    lines = [f"**{state.players[pid].name}**: " + " · ".join(player_result_parts(catalog, state, group, pid))
+             for pid in group.players if pid in state.players]
     if group.enemies:
         lines.append("Gegner: " + ", ".join(group.enemies))
     return lines
+
+
+def group_location(state: GameState, group: GroupReport):
+    ends = group.end_locations or {group.location}
+    return state.world.location(next(iter(ends)) if len(ends) == 1 else group.location)
 
 
 def chapter_text(catalog: Catalog, state: GameState, report: TurnReport, mention=lambda p: f"@{p.name}") -> str:
     out = [f"## ☀️ Tag {report.turn}"] + [f"*{text}*" for text in report.announcements]
     for group in report.groups:
         players = [state.players[p] for p in group.players if p in state.players]
-        ends = group.end_locations or {group.location}
-        location = state.world.location(next(iter(ends)) if len(ends) == 1 else group.location)
+        location = group_location(state, group)
         out.append(f"### 📍 {state.world.region_of(location.id).name} – {location.name}")
         mentions = [mention(p) for p in players if p.status != "camp"]
         if mentions:
@@ -67,7 +73,8 @@ def chapter_text(catalog: Catalog, state: GameState, report: TurnReport, mention
     return "\n\n".join(out) + "\n"
 
 
-def sheet_text(catalog: Catalog, state: GameState, player: Character) -> str:
+def sheet_parts(catalog: Catalog, state: GameState, player: Character) -> dict:
+    """Everything on a character sheet (design §16, layout 5)."""
     rules = catalog.rules
     element = rules.elements[player.element]
     max_hp = ch.max_hp(catalog, player)
@@ -80,32 +87,50 @@ def sheet_text(catalog: Catalog, state: GameState, player: Character) -> str:
     status = {"camp": " · ⛺ Im Lager", "left": " · hat das Abenteuer verlassen"}.get(player.status, "")
     if player.down:
         status += " · Kampfunfähig"
-    profile = ch.attack_profile(catalog, player)
-    attrs = " · ".join(f"{label} {ch.attribute(catalog, player, attr):+d}".replace("+0", "0")
-                       for attr, label in (("staerke", "STÄ"), ("geschick", "GES"), ("verstand", "VER")))
-    affinity = " · ".join(f"{rules.elements[e].emoji} {v}" for e, v in player.affinity.items() if v) or "–"
-    abilities = " · ".join(
-        f"{catalog.abilities[a].name} " + ("✔" if ch.ability_ready(player, a) else f"⏳ {player.cooldowns[a]} Tage")
-        for a in player.abilities
-    ) or "–"
-    equipment = " · ".join(describe(catalog, i) for i in vars(player.equipment).values() if i is not None) or "–"
-    bag = " · ".join(display_name(catalog, i) for i in player.bag) or "leer"
     location = state.world.location(player.location).name if player.location in state.world.locations else player.location
     companions = [p.name for p in state.active_players() if p.location == player.location and p.id != player.id]
-    lines = [
-        f"{player.class_label} · {element.emoji} {element.label}",
-        f"**{player.name} · Stufe {player.level}**{status}",
-        f"❤️ {_bar(player.hp, max_hp, '🟥')} {player.hp} / {max_hp} LP",
-        xp_line,
-        f"⚔️ Schaden {profile.damage_label} · 🛡️ Rüstungswert {ch.armor_value(catalog, player)} · 💰 Gold {player.gold}",
-        f"Attribute: {attrs} | Affinität: {affinity} | Fähigkeiten: {abilities}",
-        f"Ausrüstung: {equipment}",
-        f"Rucksack ({slots_used(catalog, player)} / {rules.bag_slots}): {bag}",
-    ]
+    grave = None
     if player.grave:
         grave_loc = state.world.location(player.grave.location).name
-        lines.append(f"🪦 Grab: {grave_loc} – {player.grave.gold} Gold, {len(player.grave.items)} Gegenstände")
-    lines.append(f"📍 {location}" + (f" · mit {', '.join(companions)}" if companions else ""))
+        grave = f"{grave_loc} – {player.grave.gold} Gold, {len(player.grave.items)} Gegenstände"
+    return {
+        "element": player.element,
+        "author": f"{player.class_label} · {element.emoji} {element.label}",
+        "title": f"{player.name} · Stufe {player.level}{status}",
+        "hp_line": f"❤️ {_bar(player.hp, max_hp, '🟥')} {player.hp} / {max_hp} LP",
+        "xp_line": xp_line,
+        "damage": ch.attack_profile(catalog, player).damage_label,
+        "armor": str(ch.armor_value(catalog, player)),
+        "gold": str(player.gold),
+        "attributes": [f"{label} {ch.attribute(catalog, player, attr):+d}".replace("+0", "0")
+                       for attr, label in (("staerke", "STÄ"), ("geschick", "GES"), ("verstand", "VER"))],
+        "affinity": [f"{rules.elements[e].emoji} {v}" for e, v in player.affinity.items() if v],
+        "abilities": [f"{catalog.abilities[a].name} " + ("✔" if ch.ability_ready(player, a) else f"⏳ {player.cooldowns[a]} Tage")
+                      for a in player.abilities],
+        "equipment": [describe(catalog, i) for i in vars(player.equipment).values() if i is not None],
+        "bag_label": f"Rucksack ({slots_used(catalog, player)} / {rules.bag_slots})",
+        "bag": [display_name(catalog, i) for i in player.bag],
+        "grave": grave,
+        "footer": f"📍 {location}" + (f" · mit {', '.join(companions)}" if companions else ""),
+    }
+
+
+def sheet_text(catalog: Catalog, state: GameState, player: Character) -> str:
+    s = sheet_parts(catalog, state, player)
+    lines = [
+        s["author"],
+        f"**{s['title']}**",
+        s["hp_line"],
+        s["xp_line"],
+        f"⚔️ Schaden {s['damage']} · 🛡️ Rüstungswert {s['armor']} · 💰 Gold {s['gold']}",
+        f"Attribute: {' · '.join(s['attributes'])} | Affinität: {' · '.join(s['affinity']) or '–'}"
+        f" | Fähigkeiten: {' · '.join(s['abilities']) or '–'}",
+        f"Ausrüstung: {' · '.join(s['equipment']) or '–'}",
+        f"{s['bag_label']}: {' · '.join(s['bag']) or 'leer'}",
+    ]
+    if s["grave"]:
+        lines.append(f"🪦 Grab: {s['grave']}")
+    lines.append(s["footer"])
     return "\n".join(lines)
 
 
@@ -125,32 +150,49 @@ def map_text(state: GameState) -> str:
     return "\n".join(lines)
 
 
-def quest_log_text(catalog: Catalog, state: GameState) -> str:
+def seal_line(catalog: Catalog, state: GameState) -> str | None:
     world = state.world
-    elements = catalog.rules.elements
     shards = []
-    for plan_region in world.regions.values():
-        if not plan_region.elements or plan_region.id == "final":
+    for region in world.regions.values():
+        if not region.elements or region.id == "final":
             continue
-        element = plan_region.elements[0]
-        shards.append(f"{elements[element].emoji} {'✅' if element in world.seal else '⬜'}")
-    lines = [f"📜 **{world.name}**", world.premise]
-    if shards:
-        lines.append(f"**Siegel**: {' · '.join(shards)} ({len(set(world.seal))} / {world.shards_needed} Splitter)")
-    for quest in world.quests.values():
+        element = region.elements[0]
+        shards.append(f"{catalog.rules.elements[element].emoji} {'✅' if element in world.seal else '⬜'}")
+    if not shards:
+        return None
+    return f"**Siegel**: {' · '.join(shards)} ({len(set(world.seal))} / {world.shards_needed} Splitter)"
+
+
+def quest_entries(state: GameState) -> list[tuple[str, list[str]]]:
+    """Known quests as (title, step lines); done quests without steps."""
+    entries = []
+    for quest in state.world.quests.values():
         if not quest.known:
             continue
         icon = "✅" if quest.done else ("⭐" if quest.kind == "haupt" else "📌")
-        line = f"{icon} **{quest.name}**"
+        title = f"{icon} {quest.name}"
         if quest.kind == "neben" and quest.accepted_by:
             names = [state.players[p].name for p in quest.accepted_by if p in state.players]
-            line += f" ({', '.join(names)})"
-        lines.append(line)
+            title += f" ({', '.join(names)})"
+        lines = []
         if not quest.done:
             for step in quest.steps:
-                lines.append(f"  {'✔' if step.done else '▫'} {step.text}")
+                lines.append(f"{'✔' if step.done else '▫'} {step.text}")
                 if not step.done:
                     break
+        entries.append((title, lines))
+    return entries
+
+
+def quest_log_text(catalog: Catalog, state: GameState) -> str:
+    world = state.world
+    lines = [f"📜 **{world.name}**", world.premise]
+    seal = seal_line(catalog, state)
+    if seal:
+        lines.append(seal)
+    for title, steps in quest_entries(state):
+        lines.append(f"**{title}**")
+        lines += [f"  {step}" for step in steps]
     return "\n".join(lines)
 
 
