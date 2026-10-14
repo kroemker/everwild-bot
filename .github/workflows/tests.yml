@@ -17,3 +17,5 @@ jobs:
       - run: python -m pytest -q
       - name: Combat simulation (smoke run)
         run: python sim/combat_sim.py --fights 50 --sizes 1 4 --levels 1 5
+      - name: Local play mode (scripted, offline)
+        run: PYTHONPATH=src python -m everwild play --offline --neu --dir /tmp/spiel --script examples/testrunde.txt

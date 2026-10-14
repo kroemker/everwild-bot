@@ -1,0 +1,185 @@
+{
+  "name": "Testwelt Dornbach",
+  "premise": "Das alte Siegel, das die Finsternis unter den Sümpfen bannt, bekommt Risse. Nur die Splitter der Elemente können es erneuern.",
+  "start_location": "dorf",
+  "regions": {
+    "tal": {
+      "id": "tal",
+      "name": "Tal von Dornbach",
+      "elements": [],
+      "level": 1,
+      "mood": "Sanfte Hügel, Felder voller Gerste, ein Wald aus alten Eichen. Morgens hängt Tau in den Spinnweben, abends riecht es nach Holzfeuer und frischem Brot."
+    },
+    "suempfe": {
+      "id": "suempfe",
+      "name": "Nebelsümpfe",
+      "elements": ["wasser", "schatten"],
+      "level": 2,
+      "mood": "Schwarzes Wasser, bleiche Birken, ewiger Nebel. Irrlichter tanzen über dem Moor, und jeder Schritt schmatzt. Es riecht nach Fäulnis und nassem Moos."
+    }
+  },
+  "peoples": {
+    "menschen": {"id": "menschen", "name": "Talbewohner", "elements": [], "description": "Bauern und Handwerker des Tals, freundlich, aber vorsichtig.", "attitude": 0},
+    "moorvolk": {"id": "moorvolk", "name": "Moorvolk", "elements": ["wasser", "schatten"], "description": "Scheue Sumpfbewohner mit grünlicher Haut, die Fremden misstrauen.", "attitude": -1}
+  },
+  "locations": {
+    "dorf": {
+      "id": "dorf",
+      "name": "Dorf Dornbach",
+      "region": "tal",
+      "type": "siedlung",
+      "description": "Ein Dutzend Fachwerkhäuser drängt sich um einen gepflasterten Platz. Über allem ragt der Stumpf eines eingestürzten Glockenturms auf. Aus dem Gasthaus dringt Gelächter.",
+      "features": [
+        {"id": "brunnen", "name": "Brunnen mit Bronzefigur", "description": "Eine grün angelaufene Bronzefigur eines Fährmanns mit erhobener Laterne."},
+        {"id": "glockenturm", "name": "Eingestürzter Glockenturm", "description": "Ein Haufen Steine und verkohlter Balken, halb von Efeu überwuchert.",
+         "hidden_item": {"base": "questgegenstand", "name": "Fährmannsmünze"}, "search_difficulty": "mittel"},
+        {"id": "gasthaus", "name": "Gasthaus „Zum Rostigen Kessel“", "description": "Ein schiefes Haus mit einem verbeulten Kupferkessel als Schild."}
+      ],
+      "connections": [{"to": "muehle"}, {"to": "wald"}],
+      "npcs": ["hedda", "ilsabe"],
+      "rest_point": true,
+      "inn": true,
+      "discovered": true
+    },
+    "muehle": {
+      "id": "muehle",
+      "name": "Alte Mühle",
+      "region": "tal",
+      "type": "wildnis",
+      "description": "Eine verlassene Wassermühle am Bach. Das Rad steht still, die Tür hängt schief in den Angeln, und drinnen raschelt es.",
+      "features": [
+        {"id": "muehlstein", "name": "Gesprungener Mühlstein", "description": "Ein riesiger Stein, in der Mitte geborsten.",
+         "hidden_item": {"base": "heiltrank", "name": "Heiltrank", "quantity": 2}, "search_difficulty": "leicht"},
+        {"id": "saecke", "name": "Zernagte Getreidesäcke", "description": "Überall verstreutes Korn und Rattenkot."}
+      ],
+      "connections": [{"to": "dorf"}],
+      "encounter": {"enemies": [{"name": "Riesenratte", "tier": "schwach", "count": 2}], "description": "Fette Ratten, so groß wie Hunde, mit gelben Zähnen."}
+    },
+    "wald": {
+      "id": "wald",
+      "name": "Finsterwald",
+      "region": "tal",
+      "type": "wildnis",
+      "description": "Alte Eichen schließen ihre Kronen über einem Pfad aus Moos und Wurzeln. Selbst am Mittag ist es dämmrig.",
+      "features": [
+        {"id": "eiche", "name": "Umgestürzte Eiche", "description": "Ein gewaltiger Stamm, dessen Wurzeln eine dunkle Mulde freigeben.",
+         "hidden_path": "lichtung", "search_difficulty": "mittel"},
+        {"id": "hochsitz", "name": "Verfallener Jägerstand", "description": "Ein morscher Hochsitz, die Leiter fehlt zur Hälfte."}
+      ],
+      "connections": [
+        {"to": "dorf"},
+        {"to": "schrein"},
+        {"to": "steg"},
+        {"to": "lichtung", "hidden": true}
+      ],
+      "encounter": {"enemies": [{"name": "Grauwolf", "tier": "normal", "count": 1}, {"name": "Jungwolf", "tier": "schwach", "count": 1}],
+                    "description": "Ein hageres Rudel mit gelben Augen, das zwischen den Stämmen lauert."}
+    },
+    "lichtung": {
+      "id": "lichtung",
+      "name": "Verborgene Lichtung",
+      "region": "tal",
+      "type": "wildnis",
+      "description": "Ein Kreis aus moosbewachsenen Steinen auf einer sonnigen Lichtung. Hier ist es seltsam still, als hielte der Wald den Atem an.",
+      "features": [
+        {"id": "steinkreis", "name": "Steinkreis", "description": "Sieben Steine, in die verblasste Sonnenzeichen geritzt sind.",
+         "hidden_item": {"base": "amulett", "rarity": "selten", "element": "licht"}, "search_difficulty": "mittel"}
+      ],
+      "connections": [{"to": "wald"}]
+    },
+    "schrein": {
+      "id": "schrein",
+      "name": "Schrein der Morgenröte",
+      "region": "tal",
+      "type": "schrein",
+      "description": "Eine kleine Kapelle aus weißem Stein auf einem Hügel. Durch ein rundes Fenster fällt das erste Licht des Tages direkt auf den Altar.",
+      "features": [
+        {"id": "altar", "name": "Altar aus weißem Stein", "description": "Glatt poliert von unzähligen Händen, warm, selbst in der Nacht."}
+      ],
+      "connections": [{"to": "wald"}],
+      "rest_point": true,
+      "shrine_element": "licht"
+    },
+    "steg": {
+      "id": "steg",
+      "name": "Der versunkene Steg",
+      "region": "suempfe",
+      "type": "wildnis",
+      "description": "Morsche Planken führen über schwarzes Wasser. Am Ende des Stegs ragt die Bronzefigur eines Fährmanns aus dem Morast, den Arm nach Osten ausgestreckt.",
+      "features": [
+        {"id": "planken", "name": "Morsche Planken", "description": "Glitschig und an vielen Stellen gebrochen."},
+        {"id": "faehrmann", "name": "Bronzefigur des Fährmanns", "description": "Ihr Sockel ist von Raureif überzogen, auch im Sommer.",
+         "hidden_item": {"base": "schwert", "rarity": "selten", "element": "wasser"}, "search_difficulty": "schwer"}
+      ],
+      "connections": [
+        {"to": "wald"},
+        {"to": "kate"},
+        {"to": "hort", "requirement": {"kind": "item", "item_base": "questgegenstand", "item_name": "Fährmannsmünze",
+                                       "text": "Der Nebel öffnet den Weg nur dem, der die Münze des Fährmanns trägt."}}
+      ],
+      "encounter": {"enemies": [{"name": "Moorschleicher", "tier": "normal", "elements": ["wasser", "schatten"], "count": 1},
+                                {"name": "Irrlicht", "tier": "schwach", "elements": ["schatten"], "count": 1}],
+                    "description": "Bleiche, lautlose Gestalten gleiten aus dem Schilf.", "ambush": true}
+    },
+    "kate": {
+      "id": "kate",
+      "name": "Kate der Moorhexe",
+      "region": "suempfe",
+      "type": "siedlung",
+      "description": "Eine schiefe Hütte auf Stelzen, behängt mit Knochen, Kräuterbündeln und Glöckchen. Aus dem Schornstein steigt grüner Rauch.",
+      "features": [
+        {"id": "kessel", "name": "Brodelnder Kessel", "description": "Er riecht nach Pilzen, Schwefel und – Zimt?"}
+      ],
+      "connections": [{"to": "steg"}],
+      "npcs": ["grizzelda"],
+      "rest_point": true
+    },
+    "hort": {
+      "id": "hort",
+      "name": "Hort des Sumpfkönigs",
+      "region": "suempfe",
+      "type": "hort",
+      "description": "Eine versunkene Halle aus grünem Stein, halb im Moor versunken. Wasser tropft von den Säulen, und in der Mitte thront etwas Riesiges auf einem Berg aus Knochen.",
+      "features": [
+        {"id": "thron", "name": "Thron aus Knochen", "description": "Aufgetürmt aus den Gebeinen unzähliger Wanderer."}
+      ],
+      "connections": [{"to": "steg"}],
+      "encounter": {"enemies": [{"name": "Sumpfkönig", "tier": "boss", "elements": ["wasser", "schatten"], "count": 1}],
+                    "description": "Ein aufgedunsener Riese aus Schlamm und Wurzeln mit einer Krone aus Knochen.",
+                    "loot": {"base": "questgegenstand", "name": "Wassersplitter"}}
+    }
+  },
+  "npcs": {
+    "hedda": {
+      "id": "hedda", "name": "Hedda Kesselflick", "people": "menschen", "location": "dorf",
+      "role": "Wirtin und Händlerin",
+      "appearance": "Rund, rotwangig, mit einer Schürze voller Mehl und einem Schlüsselbund am Gürtel.",
+      "personality": "Herzlich, neugierig, liebt Klatsch.",
+      "speech": "Redet ohne Punkt und Komma und nennt alle „Schätzchen“.",
+      "knowledge": ["Im Finsterwald heulen seit Wochen die Wölfe.", "Die alte Ilsabe am Brunnen weiß mehr über den Sumpf, als ihr lieb ist."],
+      "wants": "Jemand soll die Ratten aus der alten Mühle vertreiben.",
+      "attitude": 1,
+      "shop": ["heiltrank", "dolch", "lederruestung", "schild", "elementoel"]
+    },
+    "ilsabe": {
+      "id": "ilsabe", "name": "Muhme Ilsabe", "people": "menschen", "location": "dorf",
+      "role": "Alte Seherin",
+      "appearance": "Gebeugt, mit milchigen Augen und einem Stock aus schwarzem Holz.",
+      "personality": "Geheimnisvoll, müde, gütig.",
+      "speech": "Spricht in Rätseln und alten Sprichwörtern.",
+      "knowledge": ["Der Steg zum Hort des Sumpfkönigs öffnet sich nur dem, der die Fährmannsmünze trägt.", "Die Münze fiel einst vom Glockenturm, als er einstürzte.", "Das Siegel unter den Sümpfen wird schwächer."],
+      "indispensable": true
+    },
+    "grizzelda": {
+      "id": "grizzelda", "name": "Grizzelda", "people": "moorvolk", "location": "kate",
+      "role": "Moorhexe und Händlerin",
+      "appearance": "Winzig, grünhäutig, mit einer Warze, auf der eine Fliege wohnt.",
+      "personality": "Gerissen, albern, aber nicht böse.",
+      "speech": "Kichert, spricht von sich in der dritten Person und will ständig tauschen.",
+      "knowledge": ["Der Sumpfkönig fürchtet das Feuer.", "Wer auf dem Steg lärmt, weckt die Moorschleicher."],
+      "wants": "Glänzende Dinge, je mehr, desto besser.",
+      "attitude": 0,
+      "shop": ["heiltrank", "schriftrolle", "elementoel"]
+    }
+  }
+}

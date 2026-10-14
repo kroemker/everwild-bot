@@ -180,6 +180,18 @@ class GroupScaling(BaseModel):
     extra_per_player: float
 
 
+class LootTier(BaseModel):
+    gold: str
+    item_chance: float
+    rare_chance: float
+
+
+class LootTable(BaseModel):
+    tiers: dict[Tier, LootTier]
+    item_pool: list[str]
+    region_element_chance: float
+
+
 class EnemyCatalog(BaseModel):
     tiers: dict[Tier, TierDef]
     region_scaling: RegionScaling
@@ -246,7 +258,9 @@ class Character(BaseModel):
     gold: int = 0
 
     location: str = ""
+    previous_location: str = ""
     last_rest_point: str = ""
+    shrines_used: list[str] = Field(default_factory=list)
     status: Literal["active", "camp", "left"] = "active"
     down: bool = False
     idle_streak: int = 0

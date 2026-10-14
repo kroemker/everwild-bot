@@ -1,0 +1,18 @@
+# Beispiel-Runden für den lokalen Spielmodus: python -m everwild play --offline --neu --script examples/testrunde.txt
+lea: Ich bin Brakka, eine Kriegerin des Feuers. Eine vernarbte Söldnerin aus dem Norden.
+tom: Ich heiße Mira, Klerikerin des Lichts.
+:runde
+lea: Ich spreche mit Hedda und frage nach Neuigkeiten.
+tom: Ich untersuche den eingestürzten Glockenturm.
+:runde
+lea: Ich gehe in den Finsterwald.
+tom: Ich folge Brakka.
+:runde
+lea: Ich greife den Grauwolf mit meinem Schwert an!
+tom: Ich kämpfe mit dem Streitkolben.
+:runde
+lea: Ich untersuche die umgestürzte Eiche.
+tom: Ich raste.
+:runde
+:bogen Brakka
+:karte

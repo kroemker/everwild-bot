@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-from .models import AbilityDef, ClassDef, EnemyCatalog, ItemBase, NameLists, Rules
+from .models import AbilityDef, ClassDef, EnemyCatalog, ItemBase, LootTable, NameLists, Rules
 
 DEFAULT_CATALOG_DIR = Path(__file__).resolve().parents[2] / "catalog"
 
@@ -20,6 +20,7 @@ class Catalog:
     items: dict[str, ItemBase]
     names: NameLists
     enemies: EnemyCatalog
+    loot: LootTable
 
     def validate_references(self) -> None:
         """Checks that every id referenced between catalog files exists."""
@@ -34,6 +35,9 @@ class Catalog:
             for base in [gear.waffe, gear.ruestung, *gear.bag] + ([gear.schild] if gear.schild else []):
                 if base not in self.items:
                     raise ValueError(f"Klasse {class_id}: unbekannter Gegenstand {base}")
+        for base in self.loot.item_pool:
+            if base not in self.items:
+                raise ValueError(f"Beutetabelle: unbekannter Gegenstand {base}")
         for base_id, base in self.items.items():
             for class_id in base.classes or []:
                 if class_id not in self.classes:
@@ -53,6 +57,7 @@ def load_catalog(directory: Path = DEFAULT_CATALOG_DIR) -> Catalog:
         items={k: ItemBase.model_validate(v) for k, v in _read(directory / "items.json").items()},
         names=NameLists.model_validate(_read(directory / "names.json")),
         enemies=EnemyCatalog.model_validate(_read(directory / "enemies.json")),
+        loot=LootTable.model_validate(_read(directory / "loot.json")),
     )
     catalog.validate_references()
     return catalog

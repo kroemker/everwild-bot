@@ -1,0 +1,14 @@
+{
+  "tiers": {
+    "schwach": {"gold": "1d4", "item_chance": 0.05, "rare_chance": 0.0},
+    "normal": {"gold": "2d4", "item_chance": 0.12, "rare_chance": 0.1},
+    "stark": {"gold": "3d6", "item_chance": 0.3, "rare_chance": 0.25},
+    "elite": {"gold": "5d6", "item_chance": 0.6, "rare_chance": 0.5},
+    "boss": {"gold": "8d6", "item_chance": 1.0, "rare_chance": 1.0}
+  },
+  "item_pool": ["dolch", "rapier", "streitkolben", "schwert", "streitaxt", "bogen", "stab", "schild",
+                "lederruestung", "kettenhemd", "plattenpanzer", "talisman", "amulett", "ring",
+                "heiltrank", "heiltrank", "heiltrank", "schriftrolle", "elementoel",
+                "rubin", "silberkette", "trophaee"],
+  "region_element_chance": 0.4
+}
