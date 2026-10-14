@@ -975,8 +975,13 @@ Mockups of the layout: [`docs/mockups/discord-output.html`](mockups/discord-outp
 - Each group section starts with the location and the **mentions of the
   players in it**, so each player is pinged once, in the part about them.
 
-Layout of a group section: still open, see variants A–E in the mockup.
-Example (variant A):
+Layout of a group section: **variant C** from the mockup (✅ decided):
+the story as plain text with the mentions on top, and all numbers (dice,
+damage, HP, loot, XP, level-ups) in one **result embed** below it, coloured by
+the region's element. Mentions are in the message text, so they still notify.
+Out-of-character notes (unknown class, full game) stay as a subtext line.
+
+Old text-only example (variant A), kept for reference:
 
 ```
 ## ☀️ Tag 12
@@ -1004,7 +1009,9 @@ without any extra posts. Messages starting with `//` get no reaction.
 ### Character sheet
 
 One embed per player in the 📖 Weltbuch thread (embeds are fine here, no
-pings needed). Layout still open: see variants 1–4 in the mockup. The side colour shows the starting element.
+pings needed). Layout still open: variants 1–6 in the mockup;
+favourites are the fields grid (2) combined with HP / XP bars (3), see 5 and 6.
+The sheets are **public** in the thread, not sent as DMs. The side colour shows the starting element.
 
 ```
 Brakka · Kriegerin · 🔥 Feuer · Stufe 4 (340 / 400 EP)
