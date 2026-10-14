@@ -411,6 +411,36 @@ Everything else is carried in the bag:
 
 Weapons and armour can have an element (§6). Plain ones are Stahl.
 
+### Item names 💡
+
+Better items get better names. The rules only know the catalog base type
+("Schwert, selten, 💧"); the name is the flavour on top. The base type is
+always shown next to the name on the character sheet, so a fancy name never
+hides what the item does.
+
+| Rarity | Name pattern | Examples |
+|---|---|---|
+| Gewöhnlich | Plain, or with a simple material / state word | Schwert, Holzschwert, Rostige Streitaxt, Abgenutzter Lederpanzer, Kurzbogen |
+| Selten | Element or quality compound, or "*base* *des / der …*" | Frostklinge, Glutaxt, Sturmbogen, Schwert der Meister, Kettenhemd der Wacht, Dolch des Schattenläufers |
+| Legendär | A unique proper name plus an epithet, tied to the world's lore | *Ascheherz, Klinge der letzten Königin* · *Mondsplitter* · *Der Atem von Nerûn* |
+
+- **Common and rare names are built by Python** from word lists, so they are
+  consistent and grammatically correct (the catalog stores each base type's
+  grammatical gender: *das* Schwert → *Rostiges Schwert*, *die* Axt →
+  *Rostige Axt*). Word lists:
+  - quality words for Stahl items: *Meister-*, *Veteranen-*, *Hauptmanns-*,
+    *der Wacht*, *des Söldners*, *der Klingenbrüder*, …;
+  - element words: 🔥 *Glut-, Flammen-, glühend* · 💧 *Frost-, Eis-, Nebel-* ·
+    🪨 *Stein-, Dorn-, Gift-* · 🌪️ *Sturm-, Donner-, Wind-* · ☀️ *Sonnen-,
+    Licht-, geweiht* · 🌑 *Schatten-, Nacht-, verflucht*.
+- **Items from a named source** (a boss, an important NPC) can get a name from
+  the LLM that refers to it ("Krummsäbel des Sumpfkönigs"), as long as the
+  base type stays recognizable.
+- **Legendary items** are named by the LLM at world generation, with a short
+  legend that NPCs can know about (§12).
+- **Rarity marker** on the character sheet and in the result box: nothing for
+  common, ◆ for rare, ★ for legendary (*★ Ascheherz*).
+
 ### Consumables (draft)
 
 - **Heiltrank**: restores half of max HP.
