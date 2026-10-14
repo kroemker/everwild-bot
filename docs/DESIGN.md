@@ -411,7 +411,7 @@ Everything else is carried in the bag:
 
 Weapons and armour can have an element (§6). Plain ones are Stahl.
 
-### Item names 💡
+### Item names ✅
 
 Better items get better names. The rules only know the catalog base type
 ("Schwert, selten, 💧"); the name is the flavour on top. The base type is
@@ -964,7 +964,7 @@ Details of world generation follow in §11–§13. The flow:
 - Players join in plain language (§14) any time after the prologue. The first
   regular turn runs the next evening.
 
-## 16. Discord output 💡
+## 16. Discord output ✅
 
 ### One channel, one thread
 
@@ -1087,24 +1087,109 @@ bot simply waits briefly between requests and retries on a rate-limit answer.
 
 ## 17. State files and technical setup 💡
 
-Proposed repository layout:
+### Stack
+
+- **Python 3.12**, like meme-bot.
+- Dependencies: `httpx` (Discord REST and retries), `anthropic` / `openai`
+  (LLM, switchable like meme-bot), `pydantic` (validates the state files and
+  every JSON answer from the LLM), `pytest`.
+- The LLM client from meme-bot gets one addition: `ask_json(schema)`, which
+  uses the provider's structured-output / tool-use feature so answers come
+  back as JSON that matches a schema. The model is configurable per step
+  (world generation, interpret, narrate), so a stronger model can be used
+  where it matters.
+
+### Repository layout
 
 ```
-data/
-  world.json         # the whole generated world, fixed (plus state notes on locations)
-  state.json         # turn counter, last message ID, groups, graves, message IDs
-  players/<id>.json  # one file per player
-chronik/
-  tag-001.md         # readable chronicle, one file per turn
-src/                 # bot code (Python)
+catalog/                 # hand-written rules data, never changed by the bot
+  classes.json           # classes, stats, abilities (§4, §9)
+  items.json             # base types, prices, grammatical gender (§8)
+  enemies.json           # tier table (§7)
+  names.json             # word lists for item names (§8)
+  loot.json, rewards.json
+game/                    # the running game, written by the bot
+  world.json             # generated world, fixed (§11)
+  state.json             # turn, last message ID, paused / finished, seal,
+                         # graves, Discord message IDs (thread, sheets, quest log)
+  players/<discord-id>.json
+  chronik/tag-012.md     # chapter text + interpreted actions + dice, per turn
+archive/<date>/          # finished or replaced games (§15)
+src/everwild/
+  discord_api.py         # REST: read messages, post, edit, react, threads, topic
+  llm_client.py          # from meme-bot, plus ask_json
+  models.py              # pydantic models for all files
+  rules/                 # dice, checks, combat, items, xp, death, movement
+  interpret.py, narrate.py, worldgen.py, render.py (sheets, result boxes)
+  turn.py, new_game.py, play_local.py
+tests/
+sim/combat_sim.py        # balancing simulation (§7)
 .github/workflows/
-  turn.yml           # daily cron + workflow_dispatch
+  turn.yml               # daily cron + manual button
+  new-game.yml           # manual: start a new game (§15)
+  tests.yml              # runs pytest on every push
 ```
 
-- The context sent to the LLM stays small: the world skeleton (prompt caching),
-  the current location, each player's last few turns and a running summary.
-- A `concurrency:` group in the workflow prevents two runs at once.
-- A dry-run mode for testing that posts nothing and commits nothing.
+### Configuration
+
+- **Secrets**: `DISCORD_BOT_TOKEN`, `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY`.
+- **Variables**: `LLM_PROVIDER`, `ADVENTURE_CHANNEL_ID`, model names.
+- In the Discord developer portal, the **Message Content Intent** must be
+  enabled (as for meme-bot), also for reading messages over REST.
+
+### The daily workflow
+
+- Cron at about 18:00 UTC = 20:00 German summer time / 19:00 winter time (§3),
+  with a slightly off-the-hour minute, since GitHub delays runs at :00 most.
+- `concurrency: everwild` so two runs never overlap; `permissions: contents: write`.
+- One command, `python -m everwild turn`, does everything; Python commits
+  and pushes the state itself **before** posting (§3).
+- A paused or finished game makes the run exit right away.
+- GitHub disables scheduled workflows after 60 days without any commit. That
+  can't happen while the game runs (daily commits), but after a long pause the
+  workflow may need to be switched on again by hand.
+
+### Randomness
+
+- Dice use a random generator seeded from the game and turn number. A re-run
+  of the same turn gives the same dice, and bugs can be reproduced.
+
+### Errors
+
+- An invalid LLM answer (not matching the schema) is retried up to 2 times,
+  with the validation error sent along.
+- If one player's action still can't be interpreted, that player hesitates
+  this turn (treated like idle, with an out-of-character note), so one strange
+  message can't stop the whole turn.
+- Any other error fails the run **before** anything is committed or posted.
+  GitHub sends an e-mail; the turn can be re-run with the button.
+- Every run writes a **step summary** (like meme-bot): raw actions,
+  interpreted actions, dice, state changes, the chapter. That's the debugging view.
+
+### Testing without Discord
+
+- `--dry-run`: runs a real turn but posts nothing and commits nothing; the
+  chapter goes to the step summary.
+- **Local play mode**: `python -m everwild play` runs the whole game in the
+  terminal with fake players. You type the actions, it prints chapters and
+  sheets. Used to test prompts and balance before the friends see anything.
+- `pytest` for all rules (deterministic thanks to the seeded dice).
+- `sim/combat_sim.py` plays thousands of fights to tune the numbers (§7).
+
+### LLM context per call
+
+Kept small, so it stays fast and cheap:
+
+- world basics: premise, elements, peoples (same in every call, so prompt
+  caching can reuse it);
+- the current region's mood, the location's description, features and state notes;
+- the NPCs and creatures present;
+- for each player in the group: character sheet data and their last 3 turns;
+- a running **chronicle summary** of the whole game, updated each turn in a
+  few sentences.
+
+LLM calls per turn: one interpret and one narrate call per group, plus one
+summary update. With 4–6 players that is usually 3–7 calls a day.
 
 ## 18. Prompting and LLM safety 💡
 
