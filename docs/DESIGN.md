@@ -6,6 +6,9 @@ GitHub Actions cron job runs the bot, which resolves all actions with an LLM,
 posts the next chapter of the story and commits the updated game state back
 to this repository.
 
+**Status: all sections decided.** Numbers marked as drafts (combat, XP,
+consumables) get tuned with the combat simulation and local play-testing.
+
 Legend for the status of each section:
 
 - ✅ **Decided**: agreed on, build it this way.
@@ -944,7 +947,7 @@ A player is **idle** in a turn if they wrote nothing since the last turn.
 - An 11th join attempt gets a short out-of-character note in the chapter:
   *Das Abenteuer ist voll.*
 
-## 15. Starting a game 💡
+## 15. Starting a game ✅
 
 Details of world generation follow in §11–§13. The flow:
 
@@ -1192,7 +1195,7 @@ Kept small, so it stays fast and cheap:
 LLM calls per turn: one interpret and one narrate call per group, plus one
 summary update. With 4–6 players that is usually 3–7 calls a day.
 
-## 18. Prompting and LLM safety 💡
+## 18. Prompting and LLM safety ✅
 
 ### The LLM calls
 
@@ -1243,6 +1246,9 @@ summary update. With 4–6 players that is usually 3–7 calls a day.
 ### Style
 
 - Classic, serious high fantasy. NPCs speak in their own voice, some funny (§1).
+- **Present tense** ("Brakka zögert nicht. Ihr Schwert fährt herab …").
+- **Third-person narrator** who talks about the characters by name, never
+  "du" or "ihr" in the story.
 - Direct speech in German quotation marks („…“).
 - Out-of-character notes (subtext lines) address the player as *du*.
 - Content: fantasy violence yes, nothing gory or explicit (a game among friends).
@@ -1253,6 +1259,4 @@ summary update. With 4–6 players that is usually 3–7 calls a day.
   "Ich hau dem Goblin eine rein" → attack, target goblin) is run as a test
   whenever the interpret prompt changes.
 - New prompts are tried in the local play mode (§17) before going live.
-
-Open: tense and perspective of the narration (below).
 
